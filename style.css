@@ -36,3 +36,7 @@ footer {
   background: #eee;
   font-size: 0.9em;
 }
+.logo {
+  height: 40px; /* 로고 크기 */
+  margin: 10px 20px;
+}
