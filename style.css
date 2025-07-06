@@ -17,22 +17,31 @@ body {
   color: #333;
 }
 
-header {
-  background: #1f2d3d;
+.header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: space-between; /* 좌우 정렬 */
   padding: 10px 20px;
-  height: 70px;
+  background: #1f2d3d;
   position: relative;
 }
 
-.left {
-  flex-shrink: 0;
+.left, .right {
+  flex: 1;
 }
 
 .center {
-  margin: 0 auto; /* 가운데 정렬 */
+  flex: 2;
+  display: flex;
+  justify-content: center;
+}
+
+.center input {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
 }
 
 .logo {
