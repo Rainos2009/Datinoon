@@ -21,9 +21,18 @@ header {
   background: #1f2d3d;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between; /* 좌우 정렬 */
   padding: 10px 20px;
-  justify-content: flex-start;
+  height: 70px;
+  position: relative;
+}
+
+.left {
+  flex-shrink: 0;
+}
+
+.center {
+  margin: 0 auto; /* 가운데 정렬 */
 }
 
 .logo {
