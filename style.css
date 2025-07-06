@@ -49,14 +49,6 @@ body {
   margin: 10px 20px;
 }
 
-.gallery {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 20px;
-  gap: 20px;
-}
-
 footer {
   margin-top: auto; /* ✅ 푸터를 밑으로 밀어냄 */
   text-align: center;
