@@ -95,5 +95,9 @@ function logout() {
     });
 }
 
+function showLoginBox() {
+  document.querySelector('.signup-box').classList.remove('active');
+  document.querySelector('.login-box').classList.add('active');
+}
 
   // 필요하면 로그인 폼 비우기·숨기기 등…
