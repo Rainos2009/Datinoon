@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const box = document.querySelector(".login-box");
     box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
   }
+  window.toggleLoginBox = toggleLoginBox;
 
   function login() {
     const email = document.getElementById("email").value;
