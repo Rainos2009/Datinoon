@@ -47,3 +47,23 @@ function addPost() {
   });
   alert("글 업로드 완료!");
 }
+
+function showSignupBox() {
+  document.querySelector('.login-box').style.display = 'none';
+  document.querySelector('.signup-box').style.display = 'block';
+}
+
+function signup() {
+  const email = document.getElementById('signup-email').value;
+  const password = document.getElementById('signup-password').value;
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      alert('회원가입 성공! 이제 로그인 해주세요.');
+      // 회원가입 후 로그인 창으로 다시 이동
+      document.querySelector('.signup-box').style.display = 'none';
+      document.querySelector('.login-box').style.display = 'block';
+    })
+    .catch((error) => {
+      alert('회원가입 실패: ' + error.message);
+    });
+}

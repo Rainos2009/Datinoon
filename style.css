@@ -70,3 +70,10 @@ footer {
 .login-box.active {
   display: block;
 }
+.signup-box {
+  display: none;
+  margin-top: 20px;
+}
+.signup-box.active {
+  display: block;
+}
