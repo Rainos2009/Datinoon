@@ -90,6 +90,8 @@ function logout() {
     .then(() => {
       alert('로그아웃 완료!');
 
+      document.getElementById('profile-info').style.display = 'none';
+
       // 폼 전환 – 로그인 창만 보여주고 로그아웃 버튼 숨기기
       showLoginBox();
       document.getElementById('logout-btn').style.display = 'none';
