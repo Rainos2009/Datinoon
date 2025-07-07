@@ -14,7 +14,7 @@ html, body {
 body {
   font-family: 'Segoe UI', sans-serif;
   background: #f5f7fa;
-  color: #ffffff;
+  color: #333;
 }
 
 .header {
@@ -22,7 +22,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background: #1f2d3d;
+  background: #ffffff;
   position: relative;
 }
 
@@ -57,7 +57,7 @@ footer {
   font-size: 0.9em;
 }
 .logo {
-  height: 80px; /* 로고 크기 */
+  height: 55px; /* 로고 크기 */
   margin: 10px 20px;
 }
 
