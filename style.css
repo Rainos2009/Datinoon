@@ -67,7 +67,10 @@ footer {
 #searchInput {
   padding: 8px 12px;
   font-size: 16px;
-  border-radius: 6px;
-  border: 1.5px solid #333;
+  border: 2px inset #333;
+  background-color: #fff;
+  color: #000;
   margin-left: auto;
+  border-radius: 0px;
+  font-family: inherit;
 }
