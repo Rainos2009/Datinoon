@@ -40,11 +40,6 @@ body {
   border: none;
 }
 
-.logo {
-  height: 40px;
-  margin: 10px 20px;
-}
-
 footer {
   margin-top: auto; /* ✅ 푸터를 밑으로 밀어냄 */
   text-align: center;
@@ -66,4 +61,12 @@ footer {
   margin-left: 10px;
   border-radius: 0px;
   font-family: inherit;
+}
+
+.login-box {
+  display: none;
+  margin-top: 20px;
+}
+.login-box.active {
+  display: block;
 }
