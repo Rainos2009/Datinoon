@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/earlyaccess/dunggeunmo.css');
-
 body {
   html, body {
   height: 100%;
@@ -14,7 +12,7 @@ html, body {
 }
 
 body {
-  font-family: 'DungGeunMo', sans-serif;
+  font-family: 'Gulim', sans-serif;
   background: #f5f7fa;
   color: #333;
 }
@@ -75,8 +73,4 @@ footer {
   margin-left: 10px;
   border-radius: 0px;
   font-family: inherit;
-}
-
-body {
-  font-family: 'DungGeunMo', sans-serif;
 }
