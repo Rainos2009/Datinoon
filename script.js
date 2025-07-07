@@ -16,6 +16,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
   
+  const firebaseConfig = {
+    apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
+    authDomain: "datinoon-login.firebaseapp.com",
+    projectId: "datinoon-login",
+    storageBucket: "datinoon-login.firebasestorage.app",
+    messagingSenderId: "668031477218",
+    appId: "1:668031477218:web:39e5474e643dce4bd985bb",
+    // measurementId: "측정ID" (필요시)
+  };
+  firebase.initializeApp(firebaseConfig);
+
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
 
