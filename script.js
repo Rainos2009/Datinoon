@@ -59,8 +59,8 @@ function addPost() {
 }
 
 function showSignupBox() {
-  document.querySelector('.login-box').style.display = 'none';
-  document.querySelector('.signup-box').style.display = 'block';
+  document.querySelector('.login-box').classList.remove('active');
+  document.querySelector('.signup-box').classList.add('active');
 }
 
 function signup() {
@@ -68,11 +68,11 @@ function signup() {
   const password = document.getElementById('signup-password').value;
   firebase.auth().createUserWithEmailAndPassword(email, password)
     .then((userCredential) => {
-      alert('회원가입 성공! 이제 로그인 해주세요.');
-      // 회원가입 후 로그인 창으로 다시 이동
-      document.querySelector('.signup-box').style.display = 'none';
-      document.querySelector('.login-box').style.display = 'block';
-    })
+  alert('회원가입 성공! 이제 로그인 해주세요.');
+  // 창 전환
+  document.querySelector('.signup-box').classList.remove('active');
+  document.querySelector('.login-box').classList.add('active');
+})
     .catch((error) => {
       alert('회원가입 실패: ' + error.message);
     });
