@@ -77,3 +77,27 @@ function signup() {
       alert('회원가입 실패: ' + error.message);
     });
 }
+
+function logout() {
+  firebase.auth().signOut()
+    .then(() => {
+      alert('로그아웃 완료!');
+
+      // 폼 전환 – 로그인 창만 보여주고 로그아웃 버튼 숨기기
+      showLoginBox();
+      document.getElementById('logout-btn').style.display = 'none';
+    })
+    .catch((error) => {
+      alert('로그아웃 실패: ' + error.message);
+    });
+}
+
+// login() 의 then 블록 안
+.then((userCredential) => {
+  alert("로그인 성공!");
+
+  // 🔽 로그아웃 버튼 표시
+  document.getElementById('logout-btn').style.display = 'inline';
+
+  // 필요하면 로그인 폼 비우기·숨기기 등…
+})
