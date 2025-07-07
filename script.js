@@ -42,8 +42,9 @@ import { db } from './firebase-config.js';
 import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 async function addPost() {
-  await addDoc(collection(db, "posts"), {
+  await firebase.firestore().collection("posts").add({
     title: "첫 글",
-    timestamp: new Date()
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
   });
+  alert("글 업로드 완료!");
 }
