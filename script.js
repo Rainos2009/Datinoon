@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const box = document.querySelector(".login-box");
     box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
   }
-  
+
   window.toggleLoginBox = toggleLoginBox;
 
   function login() {
@@ -53,6 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch((error) => {
         alert("로그인 실패: " + error.message);
       });
+    }
 
   // script.js
 
