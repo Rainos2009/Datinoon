@@ -20,7 +20,8 @@ document.addEventListener("DOMContentLoaded", function () {
   firebase.initializeApp(firebaseConfig);
 
   function toggleLoginBox() {
-    document.querySelector(".login-box").classList.toggle("active");
+    const box = document.querySelector(".login-box");
+    box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
   }
 
   function login() {
@@ -38,11 +39,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // script.js
-import { db } from './firebase-config.js';
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-async function addPost() {
-  await firebase.firestore().collection("posts").add({
+function addPost() {
+  firebase.firestore().collection("posts").add({
     title: "첫 글",
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   });
