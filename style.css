@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'DOSGothic';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_three@1.0/DOSGothic.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   html, body {
   height: 100%;
@@ -12,7 +19,7 @@ html, body {
 }
 
 body {
-  font-family: 'Dotum', sans-serif;
+  font-family: 'DOSGothic', sans-serif;
   background: #f5f7fa;
   color: #333;
 }
