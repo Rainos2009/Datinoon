@@ -1,13 +1,3 @@
-const firebaseConfig = {
-  apiKey: "AIzaSyAbAK0yvj1wwF-CChOZbMfrx0u2f2G9uVQ",
-  authDomain: "datinoon-login.firebaseapp.com",
-  projectId: "datinoon-login",
-  storageBucket: "datinoon-login.appspot.com",
-  messagingSenderId: "668031477218",
-  appId: "1:668031477218:web:afd52e141fcdf555d985bb",
-  measurementId: "G-75TKBRKKFJ"
-};
-
 document.addEventListener("DOMContentLoaded", function () {
     const input = document.getElementById("searchInput");
     const cards = document.querySelectorAll(".card");
@@ -46,3 +36,14 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("로그인 실패: " + error.message);
       });
   }
+
+  // script.js
+import { db } from './firebase-config.js';
+import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+async function addPost() {
+  await addDoc(collection(db, "posts"), {
+    title: "첫 글",
+    timestamp: new Date()
+  });
+}
