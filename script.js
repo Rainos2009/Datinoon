@@ -42,6 +42,9 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((userCredential) => {
         alert("로그인 성공!");
         console.log("User:", userCredential.user);
+
+        document.getElementById("logout-btn").style.display = "inline";
+        
       })
       .catch((error) => {
         alert("로그인 실패: " + error.message);
@@ -87,6 +90,7 @@ function logout() {
       showLoginBox();
       document.getElementById('logout-btn').style.display = 'none';
     })
+    
     .catch((error) => {
       alert('로그아웃 실패: ' + error.message);
     });
