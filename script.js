@@ -79,10 +79,6 @@ function signup() {
     });
 }
 
-function showLoginBox() {
-  document.querySelector('.signup-box').style.display = 'none';
-  document.querySelector('.login-box').style.display = 'block';
-}
 function showSignupBox() {
   document.querySelector('.login-box').style.display = 'none';
   document.querySelector('.signup-box').style.display = 'block';
