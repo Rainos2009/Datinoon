@@ -44,7 +44,6 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("User:", userCredential.user);
 
         document.getElementById("logout-btn").style.display = "inline";
-        
       })
       .catch((error) => {
         alert("로그인 실패: " + error.message);
@@ -96,12 +95,5 @@ function logout() {
     });
 }
 
-// login() 의 then 블록 안
-.then((userCredential) => {
-  alert("로그인 성공!");
-
-  // 🔽 로그아웃 버튼 표시
-  document.getElementById('logout-btn').style.display = 'inline';
 
   // 필요하면 로그인 폼 비우기·숨기기 등…
-})
