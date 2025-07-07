@@ -25,7 +25,6 @@ document.addEventListener("DOMContentLoaded", function () {
     appId: "1:668031477218:web:39e5474e643dce4bd985bb",
     // measurementId: "측정ID" (필요시)
   };
-  firebase.initializeApp(firebaseConfig);
 
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
@@ -77,9 +76,4 @@ function signup() {
     .catch((error) => {
       alert('회원가입 실패: ' + error.message);
     });
-}
-
-function showSignupBox() {
-  document.querySelector('.login-box').style.display = 'none';
-  document.querySelector('.signup-box').style.display = 'block';
 }
