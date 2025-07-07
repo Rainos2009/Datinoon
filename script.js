@@ -1,3 +1,13 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyAbAK0yvj1wwF-CChOZbMfrx0u2f2G9uVQ",
+  authDomain: "datinoon-login.firebaseapp.com",
+  projectId: "datinoon-login",
+  storageBucket: "datinoon-login.appspot.com",
+  messagingSenderId: "668031477218",
+  appId: "1:668031477218:web:afd52e141fcdf555d985bb",
+  measurementId: "G-75TKBRKKFJ"
+};
+
 document.addEventListener("DOMContentLoaded", function () {
     const input = document.getElementById("searchInput");
     const cards = document.querySelectorAll(".card");
@@ -36,12 +46,3 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("로그인 실패: " + error.message);
       });
   }
-  const firebaseConfig = {
-    apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
-    authDomain: "datinoon-login.firebaseapp.com",
-    projectId: "datinoon-login",
-    storageBucket: "datinoon-login.firebasestorage.app",
-    messagingSenderId: "668031477218",
-    appId: "1:668031477218:web:02df73f73c44dc51d985bb",
-    measurementId: "G-RPSRPQLWLT"
-  };
