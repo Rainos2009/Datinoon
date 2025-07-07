@@ -42,13 +42,17 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((userCredential) => {
         alert("로그인 성공!");
         console.log("User:", userCredential.user);
-
         document.getElementById("logout-btn").style.display = "inline";
       })
+
+      const user = userCredential.user;
+      document.getElementById("profile-info").style.display = "inline";
+      document.getElementById("profile-info").innerText = `안녕하세요, ${user.email}!`;
+    })
+    
       .catch((error) => {
         alert("로그인 실패: " + error.message);
       });
-  }
 
   // script.js
 
