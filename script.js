@@ -33,7 +33,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const box = document.getElementById("login-box");
     box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
   }
-
   window.toggleLoginBox = toggleLoginBox;
 
   // script.js
@@ -48,15 +47,19 @@ function addPost() {
 
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
-    document.getElementById("login-box").style.display = "none";
-    document.getElementById("logout-btn").style.display = "block";
-    document.getElementById("profile-info").style.display = "block";
+    // 로그인 상태일 때
+    document.getElementById("login-btn-area").style.display = "none";   // 로그인 버튼 숨김
+    document.getElementById("login-box").style.display = "none";        // 로그인 창 숨김
+    document.getElementById("logout-btn").style.display = "block";      // 로그아웃 보임
+    document.getElementById("profile-info").style.display = "block";    // 프로필 보임
     document.getElementById("profile-info").innerHTML =
       `<span style="margin-right:10px;">${user.displayName || user.email}</span>`;
   } else {
-    document.getElementById("login-box").style.display = "block";
-    document.getElementById("logout-btn").style.display = "none";
-    document.getElementById("profile-info").style.display = "none";
+    // 로그아웃 상태일 때
+    document.getElementById("login-btn-area").style.display = "block";  // 로그인 버튼 보임
+    document.getElementById("profile-info").style.display = "none";     // 프로필 숨김
+    document.getElementById("logout-btn").style.display = "none";       // 로그아웃 숨김
+    document.getElementById("login-box").style.display = "none";        // 로그인 창은 기본적으로 숨김
   }
 });
 
@@ -64,9 +67,6 @@ function logout() {
   firebase.auth().signOut()
     .then(() => {
       alert('로그아웃 완료!');
-      document.getElementById('profile-info').style.display = 'none';
-      document.getElementById('logout-btn').style.display = 'none';
-      document.getElementById('login-box').style.display = 'block'; // 여기로 대체!
     })
     .catch((error) => {
       alert('로그아웃 실패: ' + error.message);
