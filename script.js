@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
     apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
     authDomain: "datinoon-login.firebaseapp.com",
     projectId: "datinoon-login",
-    storageBucket: "datinoon-login.appspot.com",
+    storageBucket: "datinoon-login.firebasestorage.app",
     messagingSenderId: "668031477218",
     appId: "1:668031477218:web:39e5474e643dce4bd985bb",
     // measurementId: "측정ID" (필요시)
@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const box = document.getElementById("login-box");
     box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
   }
+
   window.toggleLoginBox = toggleLoginBox;
 
   // script.js
@@ -67,21 +68,17 @@ function logout() {
   firebase.auth().signOut()
     .then(() => {
       alert('로그아웃 완료!');
+      document.getElementById('profile-info').style.display = 'none';
+      document.getElementById('logout-btn').style.display = 'none';
+      document.getElementById('login-box').style.display = 'block'; // 여기로 대체!
     })
     .catch((error) => {
       alert('로그아웃 실패: ' + error.message);
     });
 }
 
-document.getElementById('google-login-btn').onclick = function () {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider)
-    .then((result) => {
-      alert(`환영합니다, ${result.user.displayName || result.user.email}!`);
-    })
-    .catch((error) => {
-      alert('로그인 실패: ' + error.message);
-    });
+document.getElementById('google-login-btn').onclick = function() {
+  window.open('redirect-login.html', '_blank');
 };
 
   // 필요하면 로그인 폼 비우기·숨기기 등…
