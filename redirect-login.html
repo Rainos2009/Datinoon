@@ -16,18 +16,20 @@
       appId: "1:668031477218:web:39e5474e643dce4bd985bb",
     };
     firebase.initializeApp(firebaseConfig);
-
-    window.onload = function() {
-    };
     firebase.auth().getRedirectResult().then(result => {
       if (result.user) {
         alert('로그인 성공! 창을 닫아주세요.');
         if (window.opener) window.opener.location.reload();
         window.close();
     } else {
+        if (!localStorage.getItem('redirectTried')) {
+      localStorage.setItem('redirectTried', '1');
       const provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithRedirect(provider);
-     }
+    } else {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithRedirect(provider);
+    }}
     }).catch(error => {
       if (error.code) alert('로그인 실패: ' + error.message);
     });
