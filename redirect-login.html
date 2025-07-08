@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>구글 로그인 리다이렉트</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script>
+    // 네 firebaseConfig를 붙여넣기!
+    const firebaseConfig = {
+      apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
+      authDomain: "datinoon-login.firebaseapp.com",
+      projectId: "datinoon-login",
+      storageBucket: "datinoon-login.appspot.com",
+      messagingSenderId: "668031477218",
+      appId: "1:668031477218:web:39e5474e643dce4bd985bb",
+    };
+    firebase.initializeApp(firebaseConfig);
+    firebase.auth().getRedirectResult().then(result => {
+      if (result.user) {
+        sessionStorage.removeItem('redirectTried');
+        alert('로그인 성공! 창을 닫아주세요.');
+        if (window.opener) window.opener.location.reload();
+        window.close();
+    } else {
+        if (!sessionStorage.getItem('redirectTried')) {
+  sessionStorage.setItem('redirectTried', '1');
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithRedirect(provider);
+} else {
+  alert('로그인에 실패했거나 취소되었습니다.\n창을 닫고 다시 시도해주세요.');
+  window.close();
+}}
+    }).catch(error => {
+      if (error.code) alert('로그인 실패: ' + error.message);
+    });
+  </script>
+</head>
+<body>
+  <h2>구글 계정 로그인 중...</h2>
+</body>
+</html>
