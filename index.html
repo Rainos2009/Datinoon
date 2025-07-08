@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <title>Datinoon</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-  </style>
+  <style></style>
 </head>
 
 <body>
@@ -64,5 +63,24 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script src="script.js"></script>
+
+<script>
+  // [필수] Firebase 설정 및 초기화
+  const firebaseConfig = {
+    apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
+    authDomain: "datinoon-login.firebaseapp.com",
+    projectId: "datinoon-login",
+    storageBucket: "datinoon-login.firebasestorage.app",
+    messagingSenderId: "668031477218",
+    appId: "1:668031477218:web:39e5474e643dce4bd985bb",
+    measurementId: "G-1DS969657B"
+  };
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+    // Firestore, Analytics 등 필요시 아래처럼 사용 가능!
+    // const db = firebase.firestore();
+    // firebase.analytics();
+  }
+</script>
 </body>
 </html>
