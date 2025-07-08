@@ -97,11 +97,6 @@ function logout() {
     });
 }
 
-document.getElementById('google-login-btn').onclick = () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithRedirect(provider);   // ← 팝업 대신 리다이렉트
-};
-
 document.addEventListener("DOMContentLoaded", function () {
   const googleLoginBtn = document.getElementById('google-login-btn');
   if (googleLoginBtn) {
