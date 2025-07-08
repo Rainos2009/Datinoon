@@ -16,23 +16,21 @@
       appId: "1:668031477218:web:39e5474e643dce4bd985bb",
     };
     firebase.initializeApp(firebaseConfig);
-    firebase.auth().getRedirectResult().then(result => {
-      if (result.user) {
-        alert('로그인 성공! 창을 닫아주세요.');
-        if (window.opener) window.opener.location.reload();
-        window.close();
-    } else {
-        if (!sessionStorage.getItem('redirectTried')) {
-  sessionStorage.setItem('redirectTried', '1');
-  const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithRedirect(provider);
-} else {
-  alert('로그인에 실패했거나 취소되었습니다.\n창을 닫고 다시 시도해주세요.');
-  window.close();
-}}
-    }).catch(error => {
-      if (error.code) alert('로그인 실패: ' + error.message);
-    });
+
+    // 팝업 방식으로 로그인 시도!
+    window.onload = function() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then(result => {
+          alert('로그인 성공! 창을 닫아주세요.');
+          if (window.opener) window.opener.location.reload();
+          window.close();
+        })
+        .catch(error => {
+          alert('로그인 실패: ' + error.message);
+          window.close();
+        });
+    }
   </script>
 </head>
 <body>
