@@ -36,25 +36,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   window.toggleLoginBox = toggleLoginBox;
 
-  function login() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    firebase.auth().signInWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        alert("로그인 성공!");
-        console.log("User:", userCredential.user);
-        document.getElementById("logout-btn").style.display = "inline";
-      
-      const user = userCredential.user;
-      document.getElementById("profile-info").style.display = "inline";
-      document.getElementById("profile-info").innerText = `안녕하세요, ${user.email}!`;
-    })
-      .catch((error) => {
-        alert("로그인 실패: " + error.message);
-      });
-    }
-
   // script.js
 
 function addPost() {
@@ -65,46 +46,37 @@ function addPost() {
   alert("글 업로드 완료!");
 }
 
-function showSignupBox() {
-  document.querySelector('.login-box').classList.remove('active');
-  document.querySelector('.signup-box').classList.add('active');
+function googleLogin() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider)
+    .catch(error => alert("로그인 실패: " + error.message));
 }
 
-function signup() {
-  const email = document.getElementById('signup-email').value;
-  const password = document.getElementById('signup-password').value;
-  firebase.auth().createUserWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-  alert('회원가입 성공! 이제 로그인 해주세요.');
-  // 창 전환
-  document.querySelector('.signup-box').classList.remove('active');
-  document.querySelector('.login-box').classList.add('active');
-})
-    .catch((error) => {
-      alert('회원가입 실패: ' + error.message);
-    });
-}
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById("login-box").style.display = "none";
+    document.getElementById("logout-btn").style.display = "block";
+    document.getElementById("profile-info").style.display = "block";
+    document.getElementById("profile-info").innerHTML =
+      `<span style="margin-right:10px;">${user.displayName || user.email}</span>`;
+  } else {
+    document.getElementById("login-box").style.display = "block";
+    document.getElementById("logout-btn").style.display = "none";
+    document.getElementById("profile-info").style.display = "none";
+  }
+});
 
 function logout() {
   firebase.auth().signOut()
     .then(() => {
       alert('로그아웃 완료!');
-
       document.getElementById('profile-info').style.display = 'none';
-
-      // 폼 전환 – 로그인 창만 보여주고 로그아웃 버튼 숨기기
-      showLoginBox();
       document.getElementById('logout-btn').style.display = 'none';
+      document.getElementById('login-box').style.display = 'block'; // 여기로 대체!
     })
-    
     .catch((error) => {
       alert('로그아웃 실패: ' + error.message);
     });
-}
-
-function showLoginBox() {
-  document.querySelector('.signup-box').classList.remove('active');
-  document.querySelector('.login-box').classList.add('active');
 }
 
   // 필요하면 로그인 폼 비우기·숨기기 등…

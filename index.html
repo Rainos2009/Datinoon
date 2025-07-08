@@ -22,23 +22,6 @@
   <div class="profile" id="profile-info" style="display:none;"></div>
 </header>
 
-<div class="login-box" style="display:none;">
-  <input type="email" id="email" placeholder="이메일 입력">
-  <input type="password" id="password" placeholder="비밀번호 입력">
-  <a href="#" onclick="login()">로그인</a>
-  <a href="#" onclick="showSignupBox()">회원가입</a>
-</div>
-
-<!-- ✅ 새 로그아웃 버튼 -->
-<a href="#" id="logout-btn" onclick="logout()" style="display:none;">로그아웃</a>
-
-<div class="signup-box" style="display:none;">
-  <input type="email" id="signup-email" placeholder="이메일 입력">
-  <input type="password" id="signup-password" placeholder="비밀번호 입력">
-  <a href="#" onclick="signup()">회원가입 완료</a>
-  <a href="#" onclick="showLoginBox()">로그인으로</a>
-</div>
-
 <section class="intro">
   <h2>Datinoon이란?</h2>
   <p>누구나 사진과 영상을 공유하며 추억을 만들 수 있는 자유로운 커뮤니티입니다.</p>
@@ -55,6 +38,22 @@
 <footer>
   &copy; 2025 Datinoon | 이용약관 | 개인정보처리방침
 </footer>
+
+<div id="login-box" style="display:none; text-align:center;">
+  <img src="images/Datinoon_LOGO.png" style="width:160px; margin: 28px 0 18px 0;">
+  <div style="font-size: 16px; color:#333; margin-bottom:18px;">
+    Datinoon에 오신 것을 환영합니다.<br>Google 계정으로 로그인해 주세요.
+  </div>
+  <button id="google-login-btn" style="width:220px; height:44px; font-size:17px; border-radius:8px; border:none; background:#fff; box-shadow:0 2px 8px #0002;">
+    <img src="images/google_logo.png" style="width:22px; margin-right:10px; vertical-align:middle;">
+    Google로 로그인
+  </button>
+  <div style="margin-top:20px; color:#888; font-size:14px;">
+    언제든지 오십시오.<br>환영합니다.
+  </div>
+</div>
+<!-- 로그아웃 버튼은 로그인 시에만 보임 -->
+<a href="#" id="logout-btn" style="display:none; position:fixed; top:22px; right:30px; font-size:15px;">로그아웃</a>
 
 <!-- Firebase App (필수) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
