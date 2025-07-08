@@ -46,12 +46,6 @@ function addPost() {
   alert("글 업로드 완료!");
 }
 
-function googleLogin() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider)
-    .catch(error => alert("로그인 실패: " + error.message));
-}
-
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
     document.getElementById("login-box").style.display = "none";
@@ -78,5 +72,9 @@ function logout() {
       alert('로그아웃 실패: ' + error.message);
     });
 }
+
+document.getElementById('google-login-btn').onclick = function() {
+  window.open('redirect-login.html', '_blank');
+};
 
   // 필요하면 로그인 폼 비우기·숨기기 등…
