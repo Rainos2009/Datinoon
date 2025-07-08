@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
     apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
     authDomain: "datinoon-login.firebaseapp.com",
     projectId: "datinoon-login",
-    storageBucket: "datinoon-login.firebasestorage.app",
+    storageBucket: "datinoon-login.appspot.com",
     messagingSenderId: "668031477218",
     appId: "1:668031477218:web:39e5474e643dce4bd985bb",
     // measurementId: "측정ID" (필요시)
@@ -73,8 +73,15 @@ function logout() {
     });
 }
 
-document.getElementById('google-login-btn').onclick = function() {
-  window.open('redirect-login.html', '_blank');
+document.getElementById('google-login-btn').onclick = function () {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider)
+    .then((result) => {
+      alert(`환영합니다, ${result.user.displayName || result.user.email}!`);
+    })
+    .catch((error) => {
+      alert('로그인 실패: ' + error.message);
+    });
 };
 
   // 필요하면 로그인 폼 비우기·숨기기 등…
