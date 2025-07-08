@@ -22,14 +22,14 @@
         if (window.opener) window.opener.location.reload();
         window.close();
     } else {
-        if (!localStorage.getItem('redirectTried')) {
-      localStorage.setItem('redirectTried', '1');
-      const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithRedirect(provider);
-    } else {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithRedirect(provider);
-    }}
+        if (!sessionStorage.getItem('redirectTried')) {
+  sessionStorage.setItem('redirectTried', '1');
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithRedirect(provider);
+} else {
+  alert('로그인에 실패했거나 취소되었습니다.\n창을 닫고 다시 시도해주세요.');
+  window.close();
+}}
     }).catch(error => {
       if (error.code) alert('로그인 실패: ' + error.message);
     });
