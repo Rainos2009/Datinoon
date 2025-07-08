@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
   firebase.initializeApp(firebaseConfig);
 
   function toggleLoginBox() {
-    const box = document.querySelector(".login-box");
+    const box = document.getElementById("login-box");
     box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
   }
 
