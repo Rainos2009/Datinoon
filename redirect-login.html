@@ -11,13 +11,14 @@
       apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
       authDomain: "datinoon-login.firebaseapp.com",
       projectId: "datinoon-login",
-      storageBucket: "datinoon-login.firebasestorage.app",
+      storageBucket: "datinoon-login.appspot.com",
       messagingSenderId: "668031477218",
       appId: "1:668031477218:web:39e5474e643dce4bd985bb",
     };
     firebase.initializeApp(firebaseConfig);
     firebase.auth().getRedirectResult().then(result => {
       if (result.user) {
+        sessionStorage.removeItem('redirectTried');
         alert('로그인 성공! 창을 닫아주세요.');
         if (window.opener) window.opener.location.reload();
         window.close();
