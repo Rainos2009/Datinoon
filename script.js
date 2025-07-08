@@ -102,4 +102,16 @@ document.getElementById('google-login-btn').onclick = () => {
   firebase.auth().signInWithRedirect(provider);   // ← 팝업 대신 리다이렉트
 };
 
+document.addEventListener("DOMContentLoaded", function () {
+  const googleLoginBtn = document.getElementById('google-login-btn');
+  if (googleLoginBtn) {
+    googleLoginBtn.onclick = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithRedirect(provider);
+    };
+  } else {
+    console.warn('⚠️ google-login-btn 엘리먼트가 없습니다!');
+  }
+});
+
   // 필요하면 로그인 폼 비우기·숨기기 등…/
