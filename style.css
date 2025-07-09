@@ -77,3 +77,24 @@ footer {
 .signup-box.active {
   display: block;
 }
+
+#login-box {
+  display: none;
+  position: fixed;
+  left: 0; top: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.3);   /* 반투명 배경 */
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+}
+
+#login-box .login-content {
+  background: #fff;
+  border-radius: 16px;
+  padding: 38px 32px 32px 32px;
+  box-shadow: 0 4px 32px #0002;
+  max-width: 360px;
+  margin: auto;
+  text-align: center;
+}
