@@ -17,16 +17,14 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   
   const firebaseConfig = {
-    apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
-    authDomain: "datinoon-login.firebaseapp.com",
-    projectId: "datinoon-login",
-    storageBucket: "datinoon-login.appspot.com",
-    messagingSenderId: "668031477218",
-    appId: "1:668031477218:web:39e5474e643dce4bd985bb",
-    // measurementId: "측정ID" (필요시)
-  };
-
-  // ─── 1) Firebase 초기화 ─────────────────────────────────
+  apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
+  authDomain: "datinoon-login.firebaseapp.com",
+  projectId: "datinoon-login",
+  storageBucket: "datinoon-login.appspot.com",    // ← 이게 맞음!!
+  messagingSenderId: "668031477218",
+  appId: "1:668031477218:web:39e5474e643dce4bd985bb",
+  measurementId: "G-1DS969657B"
+};
 firebase.initializeApp(firebaseConfig);
 
 // ─── 2) 리다이렉트 결과 받기 ───────────────────────────
@@ -103,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (googleLoginBtn) {
     googleLoginBtn.onclick = () => {
       const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithRedirect(provider);
+      firebase.auth().signInWithPopup(provider);
     };
   } else {
     console.warn('⚠️ google-login-btn 엘리먼트가 없습니다!');
