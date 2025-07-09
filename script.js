@@ -60,6 +60,7 @@ function addPost() {
 }
 
 firebase.auth().onAuthStateChanged(user => {
+  console.log("AUTH 상태 변화:", user);
   const loginBtnArea = document.getElementById("login-btn-area");
   const loginBox = document.getElementById("login-box");
   const logoutBtn = document.getElementById("logout-btn");
