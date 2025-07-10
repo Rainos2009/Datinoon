@@ -78,7 +78,8 @@ firebase.auth().onAuthStateChanged(user => {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-        weekday: 'short'
+        weekday: 'short',
+        timeZone: 'UTC'
       })
     : '';
   document.getElementById('profile-meta').textContent = `[가입] ${joinDate}`;

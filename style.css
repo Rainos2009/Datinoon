@@ -22,6 +22,17 @@ body {
   position: relative;
 }
 
+#profile-name {
+  font-weight: bold;
+  display: block;
+}
+#profile-meta {
+  display: block;
+  color: #888;
+  font-size: 0.97em;
+  margin-top: 1px;
+}
+
 .left, .right {
   flex: 1;
 }
