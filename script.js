@@ -209,4 +209,26 @@ function openActivityModal() {
   document.getElementById('activityModal').style.display = 'block';
 }
 
+// 로그인 후 사용자 정보 로드 시 호출되는 함수에 아래 코드 추가
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    // 닉네임 불러오기
+    firebase.firestore().collection("nicknames").doc(user.uid).get().then((doc) => {
+      if (doc.exists) {
+        const nickname = doc.data().nickname;
+        document.getElementById("profile-name").textContent = nickname; // ← 여기 닉네임
+      } else {
+        document.getElementById("profile-name").textContent = user.displayName || "사용자"; // 닉네임 없을 경우 대체
+      }
+
+      // 가입일 표시 (예전처럼)
+      const createdAt = new Date(user.metadata.creationTime);
+      const joinDate = `${createdAt.getFullYear()}년 ${createdAt.getMonth() + 1}월 ${createdAt.getDate()}일`;
+      document.getElementById("profile-meta").textContent = `[가입] ${joinDate}`;
+      
+      document.getElementById("profile-account-area").style.display = "flex";
+    });
+  }
+});
+
   // 필요하면 로그인 폼 비우기·숨기기 등…/
