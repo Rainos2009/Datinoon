@@ -39,9 +39,13 @@ body {
   align-items: center;
 }
 
+.account-area {
+  overflow: visible !important;
+}
+
 .account-menu {
   position: absolute;    /* 드롭다운을 "공중"에 띄움 */
-  top: 55px;             /* 프로필 아래에 배치 (필요하면 조정) */
+  top: 80px;             /* 프로필 아래에 배치 (필요하면 조정) */
   right: 0;              /* 오른쪽 끝에 정렬 (필요시) */
   min-width: 140px;
   background: #fff;
