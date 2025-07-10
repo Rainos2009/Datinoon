@@ -127,6 +127,15 @@ function closeMenu() {
 window.openMenu = openMenu;
 window.closeMenu = closeMenu;
 
+function openSettingsModal() {
+  document.getElementById('settingsModal').style.display = 'block';
+}
+function closeSettingsModal() {
+  document.getElementById('settingsModal').style.display = 'none';
+}
+window.openSettingsModal = openSettingsModal;
+window.closeSettingsModal = closeSettingsModal;
+
 function openNicknameModal() {
   const user = firebase.auth().currentUser;
   document.getElementById('newNickname').value = user && user.displayName ? user.displayName : "";
