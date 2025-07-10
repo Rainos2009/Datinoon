@@ -74,9 +74,15 @@ firebase.auth().onAuthStateChanged(user => {
     if (accountMenu) accountMenu.style.display = "none";
     document.getElementById('profile-name').textContent = user.displayName || user.email;
     const joinDate = user.metadata && user.metadata.creationTime
-      ? `[가입]${user.metadata.creationTime.split('T')[0].replace(/-/g, '년 ').replace(' ', '월 ')}일`
-      : '';
-    document.getElementById('profile-meta').textContent = joinDate;
+    ? new Date(user.metadata.creationTime).toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'short'
+      })
+    : '';
+  document.getElementById('profile-meta').textContent = `[가입] ${joinDate}`;
+
   } else { // 62번째 줄 쯤!
     // 로그아웃 상태
     if (loginBtn) loginBtn.style.display = "block";
@@ -110,5 +116,13 @@ document.addEventListener("DOMContentLoaded", function () {
     console.warn('⚠️ google-login-btn 엘리먼트가 없습니다!');
   }
 });
+
+function toggleMenu() {
+  const menu = document.getElementById('account-menu');
+  if (menu) {
+    menu.style.display = (menu.style.display === "none" || menu.style.display === "") ? "block" : "none";
+  }
+}
+window.toggleMenu = toggleMenu; // HTML에서 onclick 사용 시 필요!
 
   // 필요하면 로그인 폼 비우기·숨기기 등…/
