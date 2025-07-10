@@ -18,8 +18,21 @@
   </div>
   <div class="right">
   <button onclick="toggleLoginBox()" style="font-size:17px;">로그인</button>
+  <div class="account-area" id="profile-account-area" style="display:none;" onclick="toggleMenu()">
+    <img src="images/Datinoon_LOGO.png" class="profile-logo">
+    <div class="profile-info">
+      <span class="profile-name" id="profile-name"></span>
+      <span class="profile-meta" id="profile-meta"></span>
+    </div>
   </div>
-  <div class="profile" id="profile-info" style="display:none;"></div>
+  <div id="account-menu" class="account-menu" style="display:none;">
+    <ul>
+      <li><a href="/profile">내 프로필</a></li>
+      <li><a href="/settings">설정</a></li>
+      <li><a href="#" onclick="logout()">로그아웃</a></li>
+    </ul>
+  </div>
+</div>
 </header>
 
 <section class="intro">

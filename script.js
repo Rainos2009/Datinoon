@@ -59,35 +59,38 @@ function addPost() {
 
 firebase.auth().onAuthStateChanged(user => {
   console.log("AUTH 상태 변화:", user);
-  const loginBtnArea = document.getElementById("login-btn-area");
-  const loginBox = document.getElementById("login-box");
-  const logoutBtn = document.getElementById("logout-btn");
-  const profileInfo = document.getElementById("profile-info");
+  const loginBtn = document.querySelector('.right button'); // 로그인 버튼
+  const accountArea = document.getElementById('profile-account-area'); // 계정 박스
+  const accountMenu = document.getElementById('account-menu'); // 드롭다운 메뉴
 
-  if (user) {
-    // 로그인 상태
-    if (loginBtnArea) loginBtnArea.style.display = "none";
-    if (loginBox) loginBox.style.display = "none";
-    if (logoutBtn) logoutBtn.style.display = "block";
-    if (profileInfo) {
-      profileInfo.style.display = "block";
-      profileInfo.innerHTML = `<span style="margin-right:10px;">${user.displayName || user.email}</span>`;
+  if (user) { // 53번째 줄 쯤!
+
+    if (user.photoURL && document.getElementById('profile-img')) {
+      document.getElementById('profile-img').src = user.photoURL;
     }
-  } else {
+    // 로그인 상태
+    if (loginBtn) loginBtn.style.display = "none";
+    if (accountArea) accountArea.style.display = "flex";
+    if (accountMenu) accountMenu.style.display = "none";
+    document.getElementById('profile-name').textContent = user.displayName || user.email;
+    const joinDate = user.metadata && user.metadata.creationTime
+      ? `[가입]${user.metadata.creationTime.split('T')[0].replace(/-/g, '년 ').replace(' ', '월 ')}일`
+      : '';
+    document.getElementById('profile-meta').textContent = joinDate;
+  } else { // 62번째 줄 쯤!
     // 로그아웃 상태
-    if (loginBtnArea) loginBtnArea.style.display = "block";
-    if (profileInfo) profileInfo.style.display = "none";
-    if (logoutBtn) logoutBtn.style.display = "none";
-    if (loginBox) loginBox.style.display = "none";
+    if (loginBtn) loginBtn.style.display = "block";
+    if (accountArea) accountArea.style.display = "none";
+    if (accountMenu) accountMenu.style.display = "none";
+    document.getElementById('profile-name').textContent = '';
+    document.getElementById('profile-meta').textContent = '';
   }
-});
+}); // onAuthStateChanged
 
 function logout() {
   firebase.auth().signOut()
     .then(() => {
       alert('로그아웃 완료!');
-      document.getElementById('profile-info').style.display = 'none';
-      document.getElementById('logout-btn').style.display = 'none';
       document.getElementById('login-box').style.display = 'block';
     })
     .catch((error) => {
