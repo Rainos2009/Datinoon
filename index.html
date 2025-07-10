@@ -138,5 +138,45 @@
   }
 </script>
 
+<div id="nicknameModal" class="popup-menu" style="display:none;">
+  <div class="popup-content">
+    <h3>닉네임 변경</h3>
+    <input type="text" id="nicknameInput" placeholder="새 닉네임 입력" style="width:100%; padding:10px; font-size:16px;" />
+    <button onclick="saveNickname()" style="margin-top:10px;">저장</button>
+    <button onclick="closeNicknameModal()" class="close-btn">닫기</button>
+  </div>
+</div>
+
+<script>
+  function openNicknameModal() {
+    document.getElementById('nicknameModal').style.display = 'block';
+  }
+
+  function closeNicknameModal() {
+    document.getElementById('nicknameModal').style.display = 'none';
+  }
+</script>
+
+<script>
+  function saveNickname() {
+    const user = firebase.auth().currentUser;
+    const nickname = document.getElementById('nicknameInput').value;
+
+    if (user && nickname.trim() !== '') {
+      firebase.firestore().collection('nicknames').doc(user.uid).set({
+        nickname: nickname
+      }).then(() => {
+        alert('닉네임이 저장되었습니다.');
+        closeNicknameModal();
+      }).catch((error) => {
+        console.error('닉네임 저장 오류:', error);
+        alert('닉네임 저장 중 오류 발생.');
+      });
+    } else {
+      alert('닉네임을 입력하세요!');
+    }
+  }
+</script>
+
 </body>
 </html>
