@@ -33,6 +33,29 @@ body {
   margin-top: 1px;
 }
 
+.account-area {
+  position: relative;    /* 드롭다운 기준이 되는 부모 */
+  display: flex;
+  align-items: center;
+}
+
+.account-menu {
+  position: absolute;    /* 드롭다운을 "공중"에 띄움 */
+  top: 55px;             /* 프로필 아래에 배치 (필요하면 조정) */
+  right: 0;              /* 오른쪽 끝에 정렬 (필요시) */
+  min-width: 140px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px #0002;
+  padding: 12px 0;
+  z-index: 1000;
+  display: none;         /* 기본은 안보임 */
+}
+.account-menu.active {
+  display: block;        /* JS에서 active 붙이면 보임 */
+}
+
 .left, .right {
   flex: 1;
 }

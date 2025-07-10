@@ -121,9 +121,9 @@ document.addEventListener("DOMContentLoaded", function () {
 function toggleMenu() {
   const menu = document.getElementById('account-menu');
   if (menu) {
-    menu.style.display = (menu.style.display === "none" || menu.style.display === "") ? "block" : "none";
+    menu.classList.toggle('active');
   }
 }
-window.toggleMenu = toggleMenu; // HTML에서 onclick 사용 시 필요!
+window.toggleMenu = toggleMenu; // HTML onclick에서 사용할 때 필요!
 
   // 필요하면 로그인 폼 비우기·숨기기 등…/
