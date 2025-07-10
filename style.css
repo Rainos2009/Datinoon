@@ -193,3 +193,10 @@ footer {
   cursor: pointer;
   font-size: 15px;
 }
+
+#settingsModal.popup-menu {
+  z-index: 3000 !important;
+}
+.popup-menu {
+  z-index: 2000;
+}
