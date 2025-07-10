@@ -118,14 +118,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-function toggleMenu() {
-  console.log("프로필 클릭됨!");
-  const menu = document.getElementById('account-menu');
-  if (menu) {
-    menu.classList.toggle('active');
-    console.log("active 토글됨", menu.classList.contains('active'));
-  }
+function openMenu() {
+  document.getElementById('popup-menu').style.display = 'block';
 }
-window.toggleMenu = toggleMenu;
+function closeMenu() {
+  document.getElementById('popup-menu').style.display = 'none';
+}
+window.openMenu = openMenu;
+window.closeMenu = closeMenu;
 
   // 필요하면 로그인 폼 비우기·숨기기 등…/

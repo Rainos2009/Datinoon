@@ -40,23 +40,6 @@ body {
   overflow: visible !important;
 }
 
-.account-menu {
-  position: absolute;    /* 드롭다운을 "공중"에 띄움 */
-  top: 45px;             /* 프로필 아래에 배치 (필요하면 조정) */
-  right: 0;              /* 오른쪽 끝에 정렬 (필요시) */
-  min-width: 140px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 16px #0002;
-  padding: 12px 0;
-  z-index: 1000;
-  display: none;         /* 기본은 안보임 */
-}
-.account-menu.active {
-  display: block;        /* JS에서 active 붙이면 보임 */
-}
-
 .left, .right {
   flex: 1;
 }
@@ -132,4 +115,58 @@ footer {
   max-width: 360px;
   margin: auto;
   text-align: center;
+}
+
+.popup-menu {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 220px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 32px #0003;
+  z-index: 2000;
+  border: 1px solid #ddd;
+}
+
+.popup-content {
+  padding: 28px 18px 18px 18px;
+}
+
+.popup-content ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.popup-content li {
+  margin: 12px 0;
+  text-align: left;
+}
+
+.popup-content li a {
+  text-decoration: none;
+  color: #333;
+  font-size: 1.07em;
+  display: block;
+  padding: 8px 6px;
+  border-radius: 6px;
+  transition: background 0.14s;
+}
+
+.popup-content li a:hover {
+  background: #f2f2f2;
+}
+
+.close-btn {
+  display: block;
+  margin: 16px auto 0 auto;
+  padding: 7px 22px;
+  border-radius: 8px;
+  background: #eee;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
 }
