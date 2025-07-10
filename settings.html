@@ -1,0 +1,38 @@
+<div class="settings-page">
+    <h2>설정</h2>
+    <div class="settings-grid">
+      <div class="setting-item" onclick="changeNickname()">
+        <img src="images/nickname_icon.png" class="icon-circle" />
+        <div class="item-label">닉네임 변경</div>
+      </div>
+      <div class="setting-item" onclick="chooseLanguage()">
+        <img src="images/lang_icon.png" class="icon-circle" />
+        <div class="item-label">언어 선택</div>
+      </div>
+      <div class="setting-item" onclick="addFriend()">
+        <img src="images/friend_icon.png" class="icon-circle" />
+        <div class="item-label">친구 추가</div>
+      </div>
+      <div class="setting-item" onclick="downloadData()">
+        <img src="images/download_icon.png" class="icon-circle" />
+        <div class="item-label">내 데이터 다운로드</div>
+      </div>
+      <div class="setting-item" onclick="accountSetting()">
+        <img src="images/account_icon.png" class="icon-circle" />
+        <div class="item-label">계정 설정</div>
+      </div>
+      <div class="setting-item" onclick="showActivity()">
+        <img src="images/activity_icon.png" class="icon-circle" />
+        <div class="item-label">내 활동 내역 보기</div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="nicknameModal" class="popup-menu" style="display:none;">
+    <div class="popup-content">
+      <h3 style="margin-top:0;">닉네임 변경</h3>
+      <input type="text" id="newNickname" maxlength="20" placeholder="새 닉네임 입력" style="width:90%;margin-bottom:12px;">
+      <button onclick="updateNickname()">변경하기</button>
+      <button onclick="closeNicknameModal()" class="close-btn">닫기</button>
+    </div>
+  </div>

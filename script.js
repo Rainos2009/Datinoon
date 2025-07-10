@@ -127,4 +127,53 @@ function closeMenu() {
 window.openMenu = openMenu;
 window.closeMenu = closeMenu;
 
+function openNicknameModal() {
+  const user = firebase.auth().currentUser;
+  document.getElementById('newNickname').value = user && user.displayName ? user.displayName : "";
+  document.getElementById('nicknameModal').style.display = 'block';
+}
+
+async function updateNickname() {
+  const user = firebase.auth().currentUser;
+  const newNickname = document.getElementById('newNickname').value.trim();
+
+  if (!newNickname) {
+    alert('닉네임을 입력하세요!');
+    return;
+  }
+  if (newNickname.length < 2 || newNickname.length > 20) {
+    alert('닉네임은 2~20자로 해주세요.');
+    return;
+  }
+
+  const nickRef = firebase.firestore().collection('nicknames').doc(newNickname);
+
+  try {
+    // 1. 닉네임이 이미 등록되어 있는지 확인
+    const doc = await nickRef.get();
+    if (doc.exists && doc.data().uid !== user.uid) {
+      alert('이미 사용 중인 닉네임입니다!');
+      return;
+    }
+
+    // 2. 기존 닉네임이 있으면 닉네임 컬렉션에서 삭제
+    const oldNickname = user.displayName;
+    if (oldNickname && oldNickname !== newNickname) {
+      await firebase.firestore().collection('nicknames').doc(oldNickname).delete();
+    }
+
+    // 3. 사용자 프로필 업데이트
+    await user.updateProfile({ displayName: newNickname });
+
+    // 4. 닉네임 컬렉션에 등록
+    await nickRef.set({ uid: user.uid });
+
+    alert('닉네임이 변경되었습니다!');
+    closeNicknameModal();
+    location.reload();
+  } catch (error) {
+    alert('변경 실패: ' + error.message);
+  }
+}
+
   // 필요하면 로그인 폼 비우기·숨기기 등…/
