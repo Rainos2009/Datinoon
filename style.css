@@ -200,3 +200,19 @@ footer {
 .popup-menu {
   z-index: 2000;
 }
+
+#settingsModal .popup-content {
+  width: 700px;
+  max-width: 98vw;
+  min-width: 400px;
+  min-height: 340px;
+  padding: 60px 44px 40px 44px;
+  font-size: 1.13em;
+}
+@media (max-width: 900px) {
+  #settingsModal .popup-content {
+    width: 95vw;
+    min-width: unset;
+    padding: 28px 5vw;
+  }
+}
