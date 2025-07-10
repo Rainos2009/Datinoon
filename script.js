@@ -185,4 +185,28 @@ async function updateNickname() {
   }
 }
 
+function openNicknameModal() {
+  const user = firebase.auth().currentUser;
+  const input = document.getElementById('newNickname');
+  if (input) input.value = user && user.displayName ? user.displayName : "";
+  const modal = document.getElementById('nicknameModal');
+  if (modal) modal.style.display = 'block';
+}
+
+function openLanguageModal() {
+  document.getElementById('languageModal').style.display = 'block';
+}
+function openFriendModal() {
+  document.getElementById('friendModal').style.display = 'block';
+}
+function downloadMyData() {
+  alert('내 데이터 다운로드 기능 준비중!');
+}
+function openAccountModal() {
+  document.getElementById('accountModal').style.display = 'block';
+}
+function openActivityModal() {
+  document.getElementById('activityModal').style.display = 'block';
+}
+
   // 필요하면 로그인 폼 비우기·숨기기 등…/

@@ -216,3 +216,22 @@ footer {
     padding: 28px 5vw;
   }
 }
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3개씩 가로 배치 */
+  gap: 18px;
+  margin-top: 18px;
+}
+.settings-grid button {
+  padding: 20px 0;
+  font-size: 1.05rem;
+  border-radius: 12px;
+  background: #f5f5f5;
+  border: 1px solid #aaa;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+.settings-grid button:hover {
+  background: #e0e6ff;
+}
