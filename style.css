@@ -191,7 +191,7 @@ footer {
 }
 
 #settingsModal.popup-menu {
-  z-index: 1000;
+  z-index: 3000;
 }
 .popup-menu {
   z-index: 2000;
