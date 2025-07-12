@@ -205,13 +205,6 @@ footer {
   padding: 60px 44px 40px 44px;
   font-size: 1.13em;
 }
-@media (max-width: 900px) {
-  #settingsModal .popup-content {
-    width: 95vw;
-    min-width: unset;
-    padding: 28px 5vw;
-  }
-}
 
 .settings-grid {
   display: grid;
@@ -376,26 +369,6 @@ footer {
   font-weight: bold;
 }
 
-/* @media screen and (max-width: 768px) {
-  .hamburger {
-    display: block;
-  }
-  .sidebar {
-    display: none;
-    position: absolute;
-    left: 0;
-    top: 50px;
-    width: 200px;
-    background-color: #fff;
-    border-right: 1px solid #ccc;
-    z-index: 1000;
-  }
-  .sidebar.active {
-    display: block;
-  }
-}
-*/
-
 .sidebar {
   display: none; /* 초기에는 안 보이게 */
   position: fixed;
@@ -413,4 +386,13 @@ footer {
 
 .sidebar.active {
   display: block;
+}
+
+.hamburger {
+  font-size: 28px;
+  cursor: pointer;
+  padding: 10px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
 }
