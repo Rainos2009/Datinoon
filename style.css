@@ -404,3 +404,24 @@ footer {
 #overlay.active {
   display: block;
 }
+
+.close-sidebar {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 22px;
+  width: 36px;
+  height: 36px;
+  line-height: 34px;
+  text-align: center;
+  cursor: pointer;
+  z-index: 4100;
+  box-shadow: 0 2px 8px #0001;
+  transition: background 0.12s;
+}
+.close-sidebar:hover {
+  background: #f7f7f7;
+}
