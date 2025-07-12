@@ -375,3 +375,29 @@ footer {
   color: #333;
   font-weight: bold;
 }
+
+.hamburger {
+  font-size: 24px;
+  cursor: pointer;
+  display: none;
+  padding: 10px;
+}
+
+@media screen and (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+  .sidebar {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 50px;
+    width: 200px;
+    background-color: #fff;
+    border-right: 1px solid #ccc;
+    z-index: 1000;
+  }
+  .sidebar.active {
+    display: block;
+  }
+}

@@ -27,12 +27,19 @@
 </div>
 </header>
 
+<div class="hamburger" onclick="toggleSidebar()">
+  &#9776;
+</div>
+
+<aside class="sidebar" id="sidebar">
+
 <aside class="sidebar">
   <div class="datinoon-net-section">
     <img src="images/DatinoonNet_2025.png" alt="Datinoon-Net 2025" style="width:100%; margin-bottom:10px;" />
     <p style="font-size:14px; color:#444;">New information for you!</p>
     <input type="text" placeholder="Datinoon-Net 검색..." style="width:90%; padding:5px; margin-top:10px;" />
-    <button onclick="location.href='/datinoonnet.html'" style="margin-top:10px;">바로가기</button>
+    <button onclick="window.open('https://datinoon-login.web.app/', '_blank')" style="margin-top:10px;">바로가기</button>
+    <p style="font-size:13px; color:#666;">Datinoon-Net과 연결된 메인 플랫폼입니다.</p>
   </div>
 
   <hr style="margin:20px 0;" />
@@ -195,6 +202,13 @@
     } else {
       alert('닉네임을 입력하세요!');
     }
+  }
+</script>
+
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    sidebar.classList.toggle("active");
   }
 </script>
 
