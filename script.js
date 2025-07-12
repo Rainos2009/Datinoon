@@ -231,4 +231,10 @@ firebase.auth().onAuthStateChanged(function(user) {
   }
 });
 
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.classList.toggle("active");
+}
+window.toggleSidebar = toggleSidebar;
+
   // 필요하면 로그인 폼 비우기·숨기기 등…/

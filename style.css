@@ -409,3 +409,22 @@ footer {
   }
 }
 */
+
+.sidebar {
+  display: none; /* 초기에는 안 보이게 */
+  position: fixed;
+  top: 60px;
+  left: 0;
+  width: 240px;
+  height: calc(100% - 60px);
+  background-color: #f7f9fb;
+  border-right: 1px solid #ccc;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  z-index: 1;
+}
+
+.sidebar.active {
+  display: block;
+}
