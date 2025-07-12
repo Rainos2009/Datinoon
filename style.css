@@ -389,10 +389,16 @@ footer {
 }
 
 .hamburger {
-  font-size: 28px;
+  font-size: 24px;
   cursor: pointer;
   padding: 10px;
   margin-right: 12px;
   display: flex;
+  align-items: center;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
 }
