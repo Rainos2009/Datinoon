@@ -330,28 +330,6 @@ footer {
   border-radius: 8px;
 }
 
-/* 사이드바 스타일 */
-.sidebar {
-  position: fixed;
-  top: 60px; /* 헤더 높이만큼 내려감 */
-  left: 0;
-  width: 240px;
-  height: calc(100% - 60px);
-  background-color: #f7f9fb;
-  border-right: 1px solid #ccc;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
-  z-index: 1;
-}
-
-/* 본문 내용은 오른쪽으로 밀어야 겹치지 않음 */
-.intro,
-.sample-content,
-footer {
-  margin-left: 260px; /* 사이드바보다 약간 여유 */
-}
-
 /* 사이드 내비게이션 */
 .sidebar-nav ul {
   list-style: none;
@@ -369,25 +347,6 @@ footer {
   font-weight: bold;
 }
 
-.sidebar {
-  display: none; /* 초기에는 안 보이게 */
-  position: fixed;
-  top: 60px;
-  left: 0;
-  width: 240px;
-  height: calc(100% - 60px);
-  background-color: #f7f9fb;
-  border-right: 1px solid #ccc;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
-  z-index: 1;
-}
-
-.sidebar.active {
-  display: block;
-}
-
 .hamburger {
   font-size: 24px;
   cursor: pointer;
@@ -401,4 +360,47 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.container {
+  display: flex;
+  margin-top: 60px; /* header 높이만큼 */
+  min-height: calc(100vh - 60px);
+}
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  background: #f7f9fb;
+  border-right: 1px solid #ccc;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  z-index: 3000;
+  transform: translateX(-260px); /* 숨긴 상태(초기) */
+  transition: transform 0.2s;
+  box-shadow: 2px 0 16px #0002;
+}
+.sidebar.active {
+  transform: translateX(0); /* 메뉴 열면 화면에 슬라이드됨 */
+}
+.main-content {
+  flex: 1;
+  padding: 24px 36px 36px 36px;
+  background: #fff;
+  min-height: 800px;
+  box-sizing: border-box;
+}
+
+#overlay {
+  display: none;
+  position: fixed;
+  z-index: 2500;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.32);
+}
+#overlay.active {
+  display: block;
 }
