@@ -379,11 +379,11 @@ footer {
 .hamburger {
   font-size: 24px;
   cursor: pointer;
-  display: none;
+  display: block;
   padding: 10px;
 }
 
-@media screen and (max-width: 768px) {
+/* @media screen and (max-width: 768px) {
   .hamburger {
     display: block;
   }
@@ -401,3 +401,4 @@ footer {
     display: block;
   }
 }
+*/
