@@ -266,3 +266,73 @@ footer {
   position: fixed;
   z-index: 4000; /* 설정보다 높게! */
 }
+
+.profile-container {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.profile-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.profile-info {
+  flex-grow: 1;
+  margin-left: 20px;
+}
+
+.join-date {
+  color: gray;
+  font-size: 0.9em;
+}
+
+.profile-actions button {
+  margin-left: 10px;
+  padding: 5px 15px;
+  font-weight: bold;
+}
+
+.logout {
+  color: red;
+  text-decoration: none;
+  margin-left: 10px;
+}
+
+.profile-tabs {
+  margin-top: 20px;
+  display: flex;
+  border-bottom: 2px solid #ddd;
+}
+
+.profile-tabs button {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  font-weight: bold;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+}
+
+.profile-tabs .active {
+  border-bottom: 3px solid black;
+}
+
+.profile-content {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
