@@ -376,20 +376,6 @@ footer {
   font-weight: bold;
 }
 
-.hamburger {
-  display: block;             /* 일단 항상 보이게 */
-  font-size: 24px;
-  cursor: pointer;
-  padding: 10px;
-  position: absolute;         /* 위치 고정 */
-  top: 10px;                  /* 위에서 10px */
-  left: 10px;                 /* 왼쪽에서 10px */
-  background-color: red;      /* 테스트용: 빨간 배경 */
-  color: white;               /* 흰색 아이콘 */
-  z-index: 9999;              /* 가장 위에 오게 */
-}
-
-
 /* @media screen and (max-width: 768px) {
   .hamburger {
     display: block;
