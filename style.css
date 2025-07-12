@@ -261,3 +261,8 @@ footer {
 #settingsModal {
   transition: opacity 0.2s ease;
 }
+
+#nicknameModal {
+  position: fixed;
+  z-index: 4000; /* 설정보다 높게! */
+}
