@@ -17,14 +17,14 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   
   const firebaseConfig = {
-  apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
-  authDomain: "datinoon-login.firebaseapp.com",
-  projectId: "datinoon-login",
-  storageBucket: "datinoon-login.appspot.com",    // ← 이게 맞음!!
-  messagingSenderId: "668031477218",
-  appId: "1:668031477218:web:39e5474e643dce4bd985bb",
-  measurementId: "G-1DS969657B"
-};
+    apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
+    authDomain: "datinoon-login.firebaseapp.com",
+    projectId: "datinoon-login",
+    storageBucket: "datinoon-login.appspot.com",
+    messagingSenderId: "668031477218",
+    appId: "1:668031477218:web:02f435a7194ab715d985bb",
+    measurementId: "G-F63ENDYFZF"
+  };
 firebase.initializeApp(firebaseConfig);
 
 // ─── 2) 리다이렉트 결과 받기 ───────────────────────────
