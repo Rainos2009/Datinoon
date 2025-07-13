@@ -425,3 +425,25 @@ footer {
 .close-sidebar:hover {
   background: #f7f7f7;
 }
+
+/* 채널 프로필 로고 */
+.channel-logo {
+  width: 74px;
+  height: 74px;
+  border-radius: 14px;
+  border: 1.5px solid #bbb;
+  margin-right: 22px;
+  background: #fafafa;
+}
+
+/* 프로필 닉네임 */
+.nickname {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* 가입일 스타일 */
+.profile-meta {
+  color: #a7a7a7;
+  font-size: 1.1rem;
+}

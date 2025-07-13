@@ -136,12 +136,6 @@ function closeSettingsModal() {
 window.openSettingsModal = openSettingsModal;
 window.closeSettingsModal = closeSettingsModal;
 
-function openNicknameModal() {
-  const user = firebase.auth().currentUser;
-  document.getElementById('newNickname').value = user && user.displayName ? user.displayName : "";
-  document.getElementById('nicknameModal').style.display = 'block';
-}
-
 async function updateNickname() {
   const user = firebase.auth().currentUser;
   const newNickname = document.getElementById('newNickname').value.trim();
@@ -212,6 +206,11 @@ function openActivityModal() {
 // 로그인 후 사용자 정보 로드 시 호출되는 함수에 아래 코드 추가
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
+
+    if (user.photoURL && document.getElementById('profile-img')) {
+      document.getElementById('profile-img').src = user.photoURL;
+    }
+    
     // 닉네임 불러오기
     firebase.firestore().collection("nicknames").doc(user.uid).get().then((doc) => {
       if (doc.exists) {
@@ -240,3 +239,11 @@ function toggleSidebar() {
 window.toggleSidebar = toggleSidebar;
 
   // 필요하면 로그인 폼 비우기·숨기기 등…/
+
+  document.querySelector('.profile-actions button:nth-child(1)').onclick = addPost;
+
+  document.querySelector('.profile-actions button:nth-child(2)').onclick = () => {
+    window.location.href = '/channel/community.html';
+  };
+
+  <img id="profile-img" src="images/Datinoon_Pro.png" class="profile-img" />
