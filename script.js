@@ -210,7 +210,7 @@ firebase.auth().onAuthStateChanged(function(user) {
     if (user.photoURL && document.getElementById('profile-img')) {
       document.getElementById('profile-img').src = user.photoURL;
     }
-    
+
     // 닉네임 불러오기
     firebase.firestore().collection("nicknames").doc(user.uid).get().then((doc) => {
       if (doc.exists) {
@@ -245,5 +245,3 @@ window.toggleSidebar = toggleSidebar;
   document.querySelector('.profile-actions button:nth-child(2)').onclick = () => {
     window.location.href = '/channel/community.html';
   };
-
-  <img id="profile-img" src="images/Datinoon_Pro.png" class="profile-img" />
