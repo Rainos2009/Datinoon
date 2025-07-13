@@ -197,66 +197,66 @@
 
   <!-- 아래에 대표 영상/사진/게시글 등 추가 가능 -->
 
-<script>
-window.addEventListener('DOMContentLoaded', function() {
-  // URL에서 uid 값 읽기 (예: profile.html?uid=abcd1234)
-  const params = new URLSearchParams(window.location.search);
-  let uid = params.get('uid'); // 처음엔 URL에서 시도
-  
-  firebase.auth().onAuthStateChanged((user) => {
-  if (!uid && user) {
-    uid = user.uid;
-  }
-
-  if (!uid) {
-    window.location.href = "/Datinoon/index.html";
-    return;
-  }
-
-  // Firestore에서 유저 정보 읽기
-  firebase.firestore().collection("users").doc(uid).get().then(doc => {
-    if (doc.exists) {
-      const data = doc.data();
-      document.getElementById("profile-name").textContent = data.nickname || "닉네임 없음";
-      document.getElementById("profile-meta").textContent = `[가입] ${data.joinDate || '-'}`;
-      document.getElementById("profile-img").src = data.avatarUrl || "images/default_avatar.png";
-      document.getElementById("tab-panel-desc").innerHTML = `<b>설명</b>${data.desc ? data.desc.replace(/\n/g, "<br>") : "소개글이 없습니다."}`;
-
-      // 탭 전환 (설명/일정/멤버)
-      const descTab = document.getElementById("tab-desc");
-      const scheduleTab = document.getElementById("tab-schedule");
-      const memberTab = document.getElementById("tab-member");
-      const tabPanel = document.getElementById("tab-panel-desc");
+  <script>
+    firebase.auth().onAuthStateChanged((user) => {
+      let uid = new URLSearchParams(window.location.search).get("uid");
     
-      descTab.onclick = function() {
-        descTab.classList.remove("inactive");
-        scheduleTab.classList.add("inactive");
-        memberTab.classList.add("inactive");
-        tabPanel.innerHTML = `<b>설명</b>${data.desc ? data.desc.replace(/\n/g, "<br>") : "소개글이 없습니다."}`;
-      };
-      scheduleTab.onclick = function() {
-        descTab.classList.add("inactive");
-        scheduleTab.classList.remove("inactive");
-        memberTab.classList.add("inactive");
-        tabPanel.innerHTML = "<b>일정</b>여기에 일정 내용 표시";
-      };
-      memberTab.onclick = function() {
-        descTab.classList.add("inactive");
-        scheduleTab.classList.add("inactive");
-        memberTab.classList.remove("inactive");
-        tabPanel.innerHTML = "<b>커뮤니티 멤버 관리</b>멤버 관리 내용 표시";
-      };
-    } else {
-      document.getElementById("profile-name").textContent = "존재하지 않는 유저";
-      document.getElementById("profile-meta").textContent = "";
-      document.getElementById("profile-img").src = "images/default_avatar.png";
-      document.getElementById("tab-panel-desc").innerHTML = "<b>설명</b>존재하지 않는 유저입니다.";
-    }
-  });
-});
-});
-
-</script>
+      // 로그인 안했으면 현재 로그인된 유저로 대체
+      if (!uid && user) {
+        uid = user.uid;
+      }
+    
+      // uid가 여전히 없다면 홈으로 이동
+      if (!uid) {
+        window.location.href = "/Datinoon/index.html";
+        return;
+      }
+    
+      // Firestore에서 유저 정보 읽기
+      firebase.firestore().collection("users").doc(uid).get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+    
+          // 닉네임, 가입일, 이미지, 설명
+          document.getElementById("profile-name").textContent = data.nickname || "닉네임 없음";
+          document.getElementById("profile-meta").textContent = `[가입] ${data.joinDate || '-'}`;
+          document.getElementById("profile-img").src = data.avatarUrl || "images/default_avatar.png";
+          document.getElementById("tab-panel-desc").innerHTML = `<b>설명</b>${data.desc ? data.desc.replace(/\n/g, "<br>") : "소개글이 없습니다."}`;
+    
+          // 탭 전환
+          const descTab = document.getElementById("tab-desc");
+          const scheduleTab = document.getElementById("tab-schedule");
+          const memberTab = document.getElementById("tab-member");
+          const tabPanel = document.getElementById("tab-panel-desc");
+    
+          descTab.onclick = function() {
+            descTab.classList.add("active");
+            scheduleTab.classList.remove("active");
+            memberTab.classList.remove("active");
+            tabPanel.innerHTML = `<b>설명</b>${data.desc ? data.desc.replace(/\n/g, "<br>") : "소개글이 없습니다."}`;
+          };
+          scheduleTab.onclick = function() {
+            descTab.classList.remove("active");
+            scheduleTab.classList.add("active");
+            memberTab.classList.remove("active");
+            tabPanel.innerHTML = "<b>일정</b>여기에 일정 내용 표시";
+          };
+          memberTab.onclick = function() {
+            descTab.classList.remove("active");
+            scheduleTab.classList.remove("active");
+            memberTab.classList.add("active");
+            tabPanel.innerHTML = "<b>커뮤니티 멤버 관리</b>멤버 관리 내용 표시";
+          };
+        } else {
+          // 문서 없음 처리
+          document.getElementById("profile-name").textContent = "존재하지 않는 유저";
+          document.getElementById("profile-meta").textContent = "";
+          document.getElementById("profile-img").src = "images/default_avatar.png";
+          document.getElementById("tab-panel-desc").innerHTML = "<b>설명</b>존재하지 않는 유저입니다.";
+        }
+      });
+    });
+    </script>
 </section>
 
 <script>
