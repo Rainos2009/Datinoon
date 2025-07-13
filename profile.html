@@ -201,7 +201,8 @@
 window.addEventListener('DOMContentLoaded', function() {
   // URL에서 uid 값 읽기 (예: profile.html?uid=abcd1234)
   const params = new URLSearchParams(window.location.search);
-  const uid = params.get('uid');
+  let uid = params.get('uid'); // 처음엔 URL에서 시도
+  
   if (!uid) {
     window.location.href = "/Datinoon/index.html";  // 또는 "/login.html"
   return;
