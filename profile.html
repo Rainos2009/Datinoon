@@ -4,6 +4,24 @@
   <meta charset="UTF-8">
   <title>채널 - Datinoon</title>
   <link rel="stylesheet" href="/Datinoon/style.css?v=0.2.7">
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
+      authDomain: "datinoon-login.firebaseapp.com",
+      projectId: "datinoon-login",
+      storageBucket: "datinoon-login.appspot.com",
+      messagingSenderId: "668031477218",
+      appId: "1:668031477218:web:02f435a7194ab715d985bb",
+      measurementId: "G-F63ENDYFZF"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
   <style>
     /* 최소한의 스타일만 샘플로! */
     .profile-section {
@@ -270,20 +288,6 @@
     });
     </script>
 </section>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAbAKoyjv1wwF-CChOZbMfrx0u2f2G9uVQ",
-    authDomain: "datinoon-login.firebaseapp.com",
-    projectId: "datinoon-login",
-    storageBucket: "datinoon-login.appspot.com",
-    messagingSenderId: "668031477218",
-    appId: "1:668031477218:web:02f435a7194ab715d985bb",
-    measurementId: "G-F63ENDYFZF"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-</script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
