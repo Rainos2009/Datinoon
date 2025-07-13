@@ -447,3 +447,39 @@ footer {
   color: #a7a7a7;
   font-size: 1.1rem;
 }
+
+.profile-tabs {
+  display: flex;
+  border-bottom: 3px solid #444;
+  margin-top: 38px;
+  margin-bottom: 0;
+}
+
+.tab {
+  font-size: 1.14rem;
+  font-weight: 800;
+  padding: 12px 48px;
+  border: 3px solid #444;
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  background: #fff;
+  margin-right: 10px;
+  letter-spacing: 1px;
+  transition: 0.14s;
+  color: #111;
+}
+
+.tab:not(.active) {
+  background: #f8f8f8;
+  color: #bbb;
+  border-color: #aaa;
+  font-weight: 700;
+}
+
+.tab.active {
+  background: #fff;
+  color: #111;
+  border-color: #444;
+  font-weight: 900;
+  z-index: 1;
+}
