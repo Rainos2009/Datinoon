@@ -203,10 +203,15 @@ window.addEventListener('DOMContentLoaded', function() {
   const params = new URLSearchParams(window.location.search);
   let uid = params.get('uid'); // 처음엔 URL에서 시도
   
+  firebase.auth().onAuthStateChanged((user) => {
+  if (!uid && user) {
+    uid = user.uid;
+  }
+
   if (!uid) {
-    window.location.href = "/Datinoon/index.html";  // 또는 "/login.html"
-  return;
-}
+    window.location.href = "/Datinoon/index.html";
+    return;
+  }
 
   // Firestore에서 유저 정보 읽기
   firebase.firestore().collection("users").doc(uid).get().then(doc => {
@@ -249,6 +254,7 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+});
 
 </script>
 </section>
@@ -271,49 +277,6 @@ window.addEventListener('DOMContentLoaded', function() {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
-
-<script>
-firebase.auth().onAuthStateChanged(async (user) => {
-  if (user) {
-    const uid = user.uid;
-
-    // 이미지
-    if (user.photoURL) {
-      document.getElementById("profile-img").src = user.photoURL;
-    }
-
-    // 닉네임
-    const nickRef = await firebase.firestore().collection("nicknames").doc(uid).get();
-    const nickname = nickRef.exists ? nickRef.data().nickname : user.displayName || "사용자";
-    document.getElementById("profile-name").textContent = nickname;
-
-    // 가입일
-    const createdAt = new Date(user.metadata.creationTime);
-    const joinDate = `${createdAt.getFullYear()}년 ${createdAt.getMonth() + 1}월 ${createdAt.getDate()}일`;
-    document.getElementById("profile-meta").textContent = `[가입] ${joinDate}`;
-
-    // 설명
-    const descSnap = await firebase.firestore().collection("descriptions").doc(uid).get();
-const desc = descSnap.exists ? descSnap.data().desc : "소개글이 없습니다.";
-document.getElementById("profile-desc").innerHTML = desc.replace(/\n/g, "<br>");
-document.getElementById("tab-panel-desc").innerHTML = "<b>설명</b>" + desc.replace(/\n/g, "<br>");
-
-  } else {
-    // 비로그인일 때 처리
-    document.getElementById("profile-meta").textContent = "[가입] -";
-    document.getElementById("profile-img").src = "images/default_avatar.png";
-    document.getElementById("profile-desc").textContent = "로그인 후에 자신의 프로필을 볼 수 있습니다.";
-  }
-});
-
-  function logout() {
-    firebase.auth().signOut().then(() => {
-      window.location.href = "/Datinoon/index.html"; // 로그아웃 후 메인으로 이동
-    }).catch(error => {
-      console.error("로그아웃 실패:", error);
-    });
-  }
-</script>
 
 </body>
 </html>
