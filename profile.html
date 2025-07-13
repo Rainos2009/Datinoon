@@ -99,28 +99,27 @@
 
   <section class="profile-section">
     <div class="profile-header">
-      <img id="profile-img" src="images/Datinoon_Pro.png" class="profile-img" />
+      <img id="profile-img" src="images/default_avatar.png" class="profile-img" />
       <div class="profile-info">
-        <span class="nickname" id="profile-nickname">채널닉네임</span><br>
-        <span class="profile-meta" id="profile-joindate">[가입] 2025년 7월 10일</span>
-      </div>
-      <div class="profile-actions">
-        <button>업로드</button>
-        <button>커뮤니티</button>
-        <button class="logout">로그아웃</button>
+        <span class="nickname" id="profile-name">게스트</span><br />
+        <span class="profile-meta" id="profile-meta">[가입] -</span>
       </div>
     </div>
-
-    <div class="channel-tabs">
-      <div class="channel-tab" id="tab-desc">설명</div>
-      <div class="channel-tab inactive" id="tab-schedule">일정</div>
-      <div class="channel-tab inactive" id="tab-member">커뮤니티 멤버 관리</div>
+  
+    <div class="profile-actions">
+      <button>업로드</button>
+      <button>커뮤니티</button>
+      <button class="logout" onclick="logout()">로그아웃</button>
     </div>
-
-    <div class="tab-panel" id="tab-panel-desc">
-      <b>설명</b>
-      안녕하십니까, Datinoon(다티눈)의 채널 운영자입니다.<br>
-      이 사이트에 방문해주셔서 감사합니다.
+  
+    <div class="profile-tabs">
+      <button class="tab active">설명</button>
+      <button class="tab">일정</button>
+      <button class="tab">커뮤니티 멤버 관리</button>
+    </div>
+  
+    <div class="tab-content">
+      <p id="profile-desc">설명이 없습니다.</p>
     </div>
   </section>
 
@@ -205,5 +204,48 @@ window.addEventListener('DOMContentLoaded', function() {
   });
 
  </script>
+
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+<script src="firebase-config.js"></script>
+<script src="script.js"></script>
+
+<script>
+firebase.auth().onAuthStateChanged(async (user) => {
+  if (user) {
+    const uid = user.uid;
+
+    // 이미지
+    if (user.photoURL) {
+      document.getElementById("profile-img").src = user.photoURL;
+    }
+
+    // 닉네임
+    const nickRef = await firebase.firestore().collection("nicknames").doc(uid).get();
+    const nickname = nickRef.exists ? nickRef.data().nickname : user.displayName || "사용자";
+    document.getElementById("profile-name").textContent = nickname;
+
+    // 가입일
+    const createdAt = new Date(user.metadata.creationTime);
+    const joinDate = `${createdAt.getFullYear()}년 ${createdAt.getMonth() + 1}월 ${createdAt.getDate()}일`;
+    document.getElementById("profile-meta").textContent = `[가입] ${joinDate}`;
+
+    // 설명
+    const descSnap = await firebase.firestore().collection("descriptions").doc(uid).get();
+    const desc = descSnap.exists ? descSnap.data().text : "설명이 없습니다.";
+    document.getElementById("profile-desc").textContent = desc;
+
+  } else {
+    // 비로그인일 때 처리
+    document.getElementById("profile-name").textContent = "게스트";
+    document.getElementById("profile-meta").textContent = "[가입] -";
+    document.getElementById("profile-img").src = "images/default_avatar.png";
+    document.getElementById("profile-desc").textContent = "로그인 후에 자신의 프로필을 볼 수 있습니다.";
+  }
+});
+</script>
 </body>
 </html>
