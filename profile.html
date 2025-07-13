@@ -212,13 +212,24 @@
         return;
       }
     
-      // Firestore에서 유저 정보 읽기
+      // 닉네임 가져오기
+      firebase.firestore().collection("nicknames").doc(uid).get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          document.getElementById("profile-name").textContent = data.nickname || "게스트";
+        } else {
+          document.getElementById("profile-name").textContent = "게스트";
+        }
+      }).catch((error) => {
+        console.error("닉네임 불러오기 오류:", error);
+        document.getElementById("profile-name").textContent = "게스트";
+      });
+    
+      // 사용자 정보 가져오기
       firebase.firestore().collection("users").doc(uid).get().then(doc => {
         if (doc.exists) {
           const data = doc.data();
     
-          // 닉네임, 가입일, 이미지, 설명
-          document.getElementById("profile-name").textContent = data.nickname || "닉네임 없음";
           document.getElementById("profile-meta").textContent = `[가입] ${data.joinDate || '-'}`;
           document.getElementById("profile-img").src = data.avatarUrl || "images/default_avatar.png";
           document.getElementById("tab-panel-desc").innerHTML = `<b>설명</b>${data.desc ? data.desc.replace(/\n/g, "<br>") : "소개글이 없습니다."}`;
@@ -229,19 +240,19 @@
           const memberTab = document.getElementById("tab-member");
           const tabPanel = document.getElementById("tab-panel-desc");
     
-          descTab.onclick = function() {
+          descTab.onclick = function () {
             descTab.classList.add("active");
             scheduleTab.classList.remove("active");
             memberTab.classList.remove("active");
             tabPanel.innerHTML = `<b>설명</b>${data.desc ? data.desc.replace(/\n/g, "<br>") : "소개글이 없습니다."}`;
           };
-          scheduleTab.onclick = function() {
+          scheduleTab.onclick = function () {
             descTab.classList.remove("active");
             scheduleTab.classList.add("active");
             memberTab.classList.remove("active");
             tabPanel.innerHTML = "<b>일정</b>여기에 일정 내용 표시";
           };
-          memberTab.onclick = function() {
+          memberTab.onclick = function () {
             descTab.classList.remove("active");
             scheduleTab.classList.remove("active");
             memberTab.classList.add("active");
@@ -249,11 +260,12 @@
           };
         } else {
           // 문서 없음 처리
-          document.getElementById("profile-name").textContent = "존재하지 않는 유저";
           document.getElementById("profile-meta").textContent = "";
           document.getElementById("profile-img").src = "images/default_avatar.png";
           document.getElementById("tab-panel-desc").innerHTML = "<b>설명</b>존재하지 않는 유저입니다.";
         }
+      }).catch((error) => {
+        console.error("유저 정보 불러오기 오류:", error);
       });
     });
     </script>
