@@ -245,3 +245,5 @@ window.toggleSidebar = toggleSidebar;
   document.querySelector('.profile-actions button:nth-child(2)').onclick = () => {
     window.location.href = '/channel/community.html';
   };
+
+  tabPanel.innerHTML = `<b>설명</b>${data.desc ? data.desc.replace(/\n/g, "<br>") : "소개글이 없습니다."}`;
