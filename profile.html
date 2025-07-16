@@ -190,7 +190,6 @@
       <button>업로드</button>
       <button>커뮤니티</button>
       <button class="logout" onclick="logout()">로그아웃</button>
-      <input type="file" id="uploadInput" style="display: none;" />
     </div>
   
     <div class="profile-tabs">
@@ -286,33 +285,66 @@
   const uploadButton = document.querySelector('.profile-actions button:first-child');
   const fileInput = document.getElementById('uploadInput');
 
-  uploadButton.addEventListener('click', () => {
-    fileInput.click(); // 파일 선택창 열기
-  });
+  // 모달 열기
+uploadButton.addEventListener('click', () => {
+  document.getElementById("uploadModal").style.display = "block";
+});
 
-  fileInput.addEventListener('change', async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+async function uploadFile() {
+  const fileInput = document.getElementById("uploadInput");
+  const file = fileInput.files[0];
+  const title = document.getElementById("videoTitle").value;
+  const desc = document.getElementById("videoDesc").value;
+  const user = firebase.auth().currentUser;
 
-    const user = firebase.auth().currentUser;
-    if (!user) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
+  if (!file || !title || !desc) {
+    alert("모든 항목을 입력해주세요.");
+    return;
+  }
 
-    const storageRef = firebase.storage().ref();
-    const fileRef = storageRef.child(`uploads/${user.uid}/${Date.now()}_${file.name}`);
+  if (!user) {
+    alert("로그인이 필요합니다.");
+    return;
+  }
 
-    try {
-      await fileRef.put(file);
-      const url = await fileRef.getDownloadURL();
-      alert(`✅ 업로드 완료!\n📎 다운로드 링크:\n${url}`);
-    } catch (err) {
-      console.error("❌ 업로드 오류:", err);
-      alert("업로드 중 오류가 발생했습니다.");
-    }
-  });
+  const storageRef = firebase.storage().ref();
+  const filePath = `uploads/${user.uid}/${Date.now()}_${file.name}`;
+  const fileRef = storageRef.child(filePath);
+
+  try {
+    await fileRef.put(file);
+    const downloadURL = await fileRef.getDownloadURL();
+
+    await firebase.firestore().collection("videos").add({
+      uid: user.uid,
+      title: title,
+      description: desc,
+      url: downloadURL,
+      uploadedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    alert("✅ 업로드 성공!");
+    document.getElementById("uploadModal").style.display = "none";
+    fileInput.value = "";
+    document.getElementById("videoTitle").value = "";
+    document.getElementById("videoDesc").value = "";
+  } catch (error) {
+    console.error("업로드 실패:", error);
+    alert("❌ 업로드 실패");
+  }
+}
 </script>
+
+<div id="uploadModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:999;">
+  <div style="background:white; padding:24px; width:400px; margin:10% auto; border-radius:10px; text-align:center;">
+    <h3>영상 업로드</h3>
+    <input type="text" id="videoTitle" placeholder="제목 입력" style="width:100%; padding:10px; margin-bottom:10px;"><br>
+    <textarea id="videoDesc" placeholder="설명 입력" style="width:100%; height:80px; padding:10px;"></textarea><br>
+    <input type="file" id="uploadInput" accept="video/*"><br><br>
+    <button onclick="uploadFile()">업로드</button>
+    <button onclick="document.getElementById('uploadModal').style.display='none'">취소</button>
+  </div>
+</div>
 
 </body>
 </html>
