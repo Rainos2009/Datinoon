@@ -1,3 +1,5 @@
+const supabase = window.supabase;
+
 document.addEventListener("DOMContentLoaded", function () {
     const input = document.getElementById("searchInput");
     const cards = document.querySelectorAll(".card");
