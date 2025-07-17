@@ -170,18 +170,19 @@
 }
   </style>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const supabase = window.supabase.createClient(
-  'https://wcjzwjxdpxvwrwkbjeyi.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indjanp3anhkcHh2d3J3a2JqZXlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2OTA4NTMsImV4cCI6MjA2ODI2Njg1M30.y0qv9mzO87RQw-3q_U6-is8nAmefcNyOrK7QApsh1qc'
-);
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/dist/umd/supabase.min.js"></script>
 </head>
 <body>
   <header class="header">
     <!-- 공통 헤더 넣기 -->
   </header>
+
+  <script>
+    const supabase = supabase.createClient(
+    'https://wcjzwjxdpxvwrwkbjeyi.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indjanp3anhkcHh2d3J3a2JqZXlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2OTA4NTMsImV4cCI6MjA2ODI2Njg1M30.y0qv9mzO87RQw-3q_U6-is8nAmefcNyOrK7QApsh1qc'
+  );
+  </script>
 
   <section class="profile-section">
     <div class="profile-header">
