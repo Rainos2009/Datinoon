@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>채널 - Datinoon</title>
-  <link rel="stylesheet" href="/Datinoon/style.css?v=0.2.7">
+  <link rel="stylesheet" href="style.css?v=0.2.7">
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -170,7 +170,13 @@
 }
   </style>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  const supabase = supabase.createClient(
+    'https://your-project-id.supabase.co',
+    'your-anon-public-key'
+  );
+</script>
 </head>
 <body>
   <header class="header">
@@ -283,7 +289,6 @@
 <script>
   // 업로드 버튼 찾기
   const uploadButton = document.querySelector('.profile-actions button:first-child');
-  const fileInput = document.getElementById('uploadInput');
 
   // 모달 열기
 uploadButton.addEventListener('click', () => {
@@ -295,43 +300,62 @@ async function uploadFile() {
   const file = fileInput.files[0];
   const title = document.getElementById("videoTitle").value;
   const desc = document.getElementById("videoDesc").value;
-  const user = firebase.auth().currentUser;
+  const firebaseUser = firebase.auth().currentUser;
+
+  const statusEl = document.getElementById("uploadStatus");
+  statusEl.style.display = "block";
 
   if (!file || !title || !desc) {
     alert("모든 항목을 입력해주세요.");
     return;
   }
 
-  if (!user) {
-    alert("로그인이 필요합니다.");
+  const filePath = `${firebaseUser.uid}/${Date.now()}_${file.name}`;
+
+  // 1. Supabase Storage에 파일 업로드
+  const { data, error } = await supabase.storage
+    .from("videos") // 버킷 이름
+    .upload(filePath, file);
+
+  if (error) {
+    console.error("업로드 실패:", error);
+    alert("❌ 업로드 실패");
     return;
   }
 
-  const storageRef = firebase.storage().ref();
-  const filePath = `uploads/${user.uid}/${Date.now()}_${file.name}`;
-  const fileRef = storageRef.child(filePath);
+  // 2. 공개 URL 가져오기
+  const { data: publicUrlData } = supabase.storage
+    .from("videos")
+    .getPublicUrl(filePath);
 
-  try {
-    await fileRef.put(file);
-    const downloadURL = await fileRef.getDownloadURL();
+  const downloadURL = publicUrlData.publicUrl;
 
-    await firebase.firestore().collection("videos").add({
-      uid: user.uid,
-      title: title,
-      description: desc,
-      url: downloadURL,
-      uploadedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+  // 3. Supabase DB에 메타데이터 저장
+  const { error: dbError } = await supabase
+    .from("videos") // 너가 만든 테이블 이름
+    .insert([
+      {
+        uid: firebaseUser.uid,
+        title: title,
+        description: desc,
+        url: downloadURL,
+        uploaded_at: new Date().toISOString()
+      }
+    ]);
 
-    alert("✅ 업로드 성공!");
-    document.getElementById("uploadModal").style.display = "none";
-    fileInput.value = "";
-    document.getElementById("videoTitle").value = "";
-    document.getElementById("videoDesc").value = "";
-  } catch (error) {
-    console.error("업로드 실패:", error);
-    alert("❌ 업로드 실패");
+  statusEl.style.display = "none";
+
+  if (dbError) {
+    console.error("DB 저장 실패:", dbError);
+    alert("❌ 데이터 저장 실패");
+    return;
   }
+
+  alert("✅ 업로드 성공!");
+  document.getElementById("uploadModal").style.display = "none";
+  fileInput.value = "";
+  document.getElementById("videoTitle").value = "";
+  document.getElementById("videoDesc").value = "";
 }
 </script>
 
@@ -341,6 +365,7 @@ async function uploadFile() {
     <input type="text" id="videoTitle" placeholder="제목 입력" style="width:100%; padding:10px; margin-bottom:10px;"><br>
     <textarea id="videoDesc" placeholder="설명 입력" style="width:100%; height:80px; padding:10px;"></textarea><br>
     <input type="file" id="uploadInput" accept="video/*"><br><br>
+    <p id="uploadStatus" class="upload-status">업로드 중...</p>
     <button onclick="uploadFile()">업로드</button>
     <button onclick="document.getElementById('uploadModal').style.display='none'">취소</button>
   </div>
