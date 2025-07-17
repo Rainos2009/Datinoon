@@ -1,3 +1,10 @@
+<script>
+  const supabase = supabase.createClient(
+  'https://wcjzwjxdpxvwrwkbjeyi.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indjanp3anhkcHh2d3J3a2JqZXlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2OTA4NTMsImV4cCI6MjA2ODI2Njg1M30.y0qv9mzO87RQw-3q_U6-is8nAmefcNyOrK7QApsh1qc'
+);
+  </script>
+
 document.addEventListener("DOMContentLoaded", function () {
     const input = document.getElementById("searchInput");
     const cards = document.querySelectorAll(".card");
