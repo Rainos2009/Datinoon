@@ -285,6 +285,7 @@
     });
   
     window.uploadFile = async function () {
+      console.log("✅ uploadFile 함수 실행됨");
       const fileInput = document.getElementById("uploadInput");
       const file = fileInput.files[0];
       const title = document.getElementById("videoTitle").value;
