@@ -303,8 +303,10 @@
       const filePath = `${firebaseUser.uid}/${Date.now()}_${file.name}`;
   
       const { data, error } = await supabase.storage
-        .from("videos")
-        .upload(filePath, file);
+  .from("videos")
+  .upload(filePath, file, {
+    contentType: file.type
+  });
   
       if (error) {
         console.error("업로드 실패:", error);
