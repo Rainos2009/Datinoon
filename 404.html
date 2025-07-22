@@ -6,17 +6,32 @@
   <style>
     body {
       margin: 0;
-      background: black;
-    }
-    img {
-      display: block;
-      width: 100vw;
       height: 100vh;
-      object-fit: cover;
+      background: url("images/404.png") no-repeat center center;
+      background-size: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: white;
+      text-align: center;
+      font-family: sans-serif;
+    }
+
+    h1 {
+      font-size: 3rem;
+      text-shadow: 2px 2px 5px black;
+    }
+
+    p {
+      font-size: 1.5rem;
+      text-shadow: 1px 1px 3px black;
     }
   </style>
 </head>
 <body>
-  <img src="images/404.png" alt="404 Error">
+  <h1>ERROR: 404</h1>
+  <p>"The page you're looking for couldn't be found."</p>
+  <p>Please check the website again.</p>
 </body>
 </html>
