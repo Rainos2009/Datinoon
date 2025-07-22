@@ -359,5 +359,22 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/dist/umd/supabase.min.js" defer></script>
 <script src="supabase-config.js" defer></script>   <!-- 2: 객체 생성 -->
 <script src="script.js" defer></script>
+
+<script>
+  // Supabase 라이브러리가 로드될 때까지 대기
+  window.addEventListener('DOMContentLoaded', () => {
+    if (!window.supabase || !window.supabase.createClient) {
+      console.error("❌ Supabase 라이브러리가 아직 준비되지 않았습니다.");
+    } else {
+      const supabaseClient = window.supabase.createClient(
+        'https://wcjzwjxdpxvwrwkbjeyi.supabase.co',
+        'sb_publishable_EGSt0BKAsLxDpQuzGMcBlw_IpAyOyGi'
+      );
+      window.supabase = supabaseClient;
+      console.log("✅ Supabase 클라이언트가 정상적으로 초기화되었습니다.");
+    }
+  });
+</script>
+
 </body>
 </html>
