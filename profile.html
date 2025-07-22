@@ -276,79 +276,73 @@
     </script>
 </section>
 
-
 <script>
-  // 업로드 버튼 찾기
-  const uploadButton = document.querySelector('.profile-actions button:first-child');
-
-  // 모달 열기
-uploadButton.addEventListener('click', () => {
-  document.getElementById("uploadModal").style.display = "block";
-});
-
-async function uploadFile() {
-  const fileInput = document.getElementById("uploadInput");
-  const file = fileInput.files[0];
-  const title = document.getElementById("videoTitle").value;
-  const desc = document.getElementById("videoDesc").value;
-  const firebaseUser = firebase.auth().currentUser;
-
-  const statusEl = document.getElementById("uploadStatus");
-  statusEl.style.display = "block";
-
-  if (!file || !title || !desc) {
-    alert("모든 항목을 입력해주세요.");
-    return;
-  }
-
-  const filePath = `${firebaseUser.uid}/${Date.now()}_${file.name}`;
-
-  // 1. Supabase Storage에 파일 업로드
-  const { data, error } = await supabase.storage
-    .from("videos") // 버킷 이름
-    .upload(filePath, file);
-
-  if (error) {
-    console.error("업로드 실패:", error);
-    alert("❌ 업로드 실패");
-    return;
-  }
-
-  // 2. 공개 URL 가져오기
-  const { data: publicUrlData } = supabase.storage
-    .from("videos")
-    .getPublicUrl(filePath);
-
-  const downloadURL = publicUrlData.publicUrl;
-
-  // 3. Supabase DB에 메타데이터 저장
-  const { error: dbError } = await supabase
-    .from("videos") // 너가 만든 테이블 이름
-    .insert([
-      {
-        uid: firebaseUser.uid,
-        title: title,
-        description: desc,
-        url: downloadURL,
-        uploaded_at: new Date().toISOString()
+  window.onload = () => {
+    const uploadButton = document.querySelector('.profile-actions button:first-child');
+  
+    uploadButton.addEventListener('click', () => {
+      document.getElementById("uploadModal").style.display = "block";
+    });
+  
+    window.uploadFile = async function () {
+      const fileInput = document.getElementById("uploadInput");
+      const file = fileInput.files[0];
+      const title = document.getElementById("videoTitle").value;
+      const desc = document.getElementById("videoDesc").value;
+      const firebaseUser = firebase.auth().currentUser;
+  
+      const statusEl = document.getElementById("uploadStatus");
+      statusEl.style.display = "block";
+  
+      if (!file || !title || !desc) {
+        alert("모든 항목을 입력해주세요.");
+        return;
       }
-    ]);
-
-  statusEl.style.display = "none";
-
-  if (dbError) {
-    console.error("DB 저장 실패:", dbError);
-    alert("❌ 데이터 저장 실패");
-    return;
-  }
-
-  alert("✅ 업로드 성공!");
-  document.getElementById("uploadModal").style.display = "none";
-  fileInput.value = "";
-  document.getElementById("videoTitle").value = "";
-  document.getElementById("videoDesc").value = "";
-}
-</script>
+  
+      const filePath = `${firebaseUser.uid}/${Date.now()}_${file.name}`;
+  
+      const { data, error } = await supabase.storage
+        .from("videos")
+        .upload(filePath, file);
+  
+      if (error) {
+        console.error("업로드 실패:", error);
+        alert("❌ 업로드 실패");
+        return;
+      }
+  
+      const { data: publicUrlData } = supabase.storage
+        .from("videos")
+        .getPublicUrl(filePath);
+  
+      const downloadURL = publicUrlData.publicUrl;
+  
+      const { error: dbError } = await supabase
+        .from("videos")
+        .insert([{
+          uid: firebaseUser.uid,
+          title: title,
+          description: desc,
+          url: downloadURL,
+          uploaded_at: new Date().toISOString()
+        }]);
+  
+      statusEl.style.display = "none";
+  
+      if (dbError) {
+        console.error("DB 저장 실패:", dbError);
+        alert("❌ 데이터 저장 실패");
+        return;
+      }
+  
+      alert("✅ 업로드 성공!");
+      document.getElementById("uploadModal").style.display = "none";
+      fileInput.value = "";
+      document.getElementById("videoTitle").value = "";
+      document.getElementById("videoDesc").value = "";
+    };
+  };
+  </script>
 
 <div id="uploadModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:999;">
   <div style="background:white; padding:24px; width:400px; margin:10% auto; border-radius:10px; text-align:center;">
