@@ -33,10 +33,10 @@
     <img src="images/Datinoon_0.3.1.png" class="logo" />
   </div>
   <div class="center">
-    <input type="text" id="searchInput" placeholder="검색창" />
+    <input type="text" id="searchInput" placeholder="検索ボックス" />
   </div>
   <div class="right">
-  <button onclick="toggleLoginBox()" style="font-size:17px;">로그인</button>
+  <button onclick="toggleLoginBox()" style="font-size:17px;">ログイン</button>
   <div class="account-area" id="profile-account-area" style="display:none;" onclick="openMenu()">
    <img src="images/Datinoon_Pro.png" class="profile-logo">
     <div class="profile-info">
@@ -50,20 +50,20 @@
   <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
   <div class="datinoon-net-section">
     <img src="images/DatinoonNet_2025.png" alt="Datinoon-Net 2025" style="width:100%; margin-bottom:10px;" />
-    <p style="font-size:14px; color:#444;">New information for you!</p>
+    <p style="font-size:14px; color:#444;">新しい情報をお届けします！</p>
     <input type="text" placeholder="Datinoon-Net 검색..." style="width:90%; padding:5px; margin-top:10px;" />
     <button onclick="window.open('https://datinoon-login.web.app/', '_blank')" style="margin-top:10px;">바로가기</button>
-    <p style="font-size:13px; color:#666;">Datinoon-Net과 연결된 메인 플랫폼입니다.</p>
+    <p style="font-size:13px; color:#666;">Datinoon-Net と連携されたメインプラットフォームです。</p>
   </div>
 
   <hr style="margin:20px 0;" />
 
   <nav class="sidebar-nav">
     <ul>
-      <li><a href="#">📁 채널 탐색</a></li>
-      <li><a href="#">🖼️ 사진</a></li>
-      <li><a href="#">🎞️ 영상</a></li>
-      <li><a href="#">🏆 명예의 전당</a></li>
+      <li><a href="#">📁 チャンネル探索</a></li>
+      <li><a href="#">🖼️ 写真</a></li>
+      <li><a href="#">🎞️ 動画</a></li>
+      <li><a href="#">🏆 殿堂入り</a></li>
     </ul>
   </nav>
 </aside>
@@ -75,11 +75,11 @@
 <div id="popup-menu" class="popup-menu">
   <div class="popup-content">
     <ul>
-      <li><a id="profile-link" href="/Datinoon/profile.html">내 프로필</a>
-      <li><a href="#" onclick="openSettingsModal()">설정</a></li>
-      <li><a href="#" onclick="logout()">로그아웃</a></li>
+      <li><a id="profile-link" href="/Datinoon/profile.html">マイプロフィール</a>
+      <li><a href="#" onclick="openSettingsModal()">設定</a></li>
+      <li><a href="#" onclick="logout()">ログアウト</a></li>
     </ul>
-    <button onclick="closeMenu()" class="close-btn">닫기</button>
+    <button onclick="closeMenu()" class="close-btn">閉じる</button>
   </div>
 </div>
 
@@ -97,27 +97,27 @@
 </section>
 
 <footer>
-  &copy; 2025 Datinoon | 이용약관 | 개인정보처리방침
+  &copy; 2025 Datinoon | 利用規約 | プライバシーポリシー
 </footer>
 
 <div id="login-box">
   <div class="login-content">
     <img src="images/Datinoon_0.3.1.png" style="width:160px; margin: 28px 0 18px 0;">
     <div style="font-size: 16px; color:#333; margin-bottom:18px;">
-      Datinoon에 오신 것을 환영합니다.<br>Google 계정으로 로그인해 주세요.
+      Datinoonへようこそ。<br>Googleアカウントでログインしてください。
     </div>
     <button id="google-login-btn" style="width:220px; height:44px; font-size:17px; border-radius:8px; border:none; background:#fff; box-shadow:0 2px 8px #0002;">
       <img src="images/Google_LOGO.png" style="width:22px; margin-right:10px; vertical-align:middle;">
-      Google로 로그인
+      Googleでログイン
     </button>
     <div style="margin-top:20px; color:#888; font-size:14px;">
-      언제든지 오십시오.<br>환영합니다.
+      いつでもお越しください。<br>ようこそ。
     </div>
-    <button onclick="toggleLoginBox()" style="margin-top:18px; color:#666; background:none; border:none; font-size:13px;">✖ 닫기</button>
+    <button onclick="toggleLoginBox()" style="margin-top:18px; color:#666; background:none; border:none; font-size:13px;">✖ 閉じる</button>
   </div>
 </div>
 <!-- 로그아웃 버튼은 로그인 시에만 보임 -->
-<a href="#" id="logout-btn" onclick="logout()" style="display:none; position:fixed; top:22px; right:30px; font-size:15px;">로그아웃</a>
+<a href="#" id="logout-btn" onclick="logout()" style="display:none; position:fixed; top:22px; right:30px; font-size:15px;">ログアウト</a>
 
 <!-- Firebase App (필수) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -131,46 +131,46 @@
 
 <div id="settingsModal" class="popup-menu" style="display:none;">
   <div class="popup-content">
-    <h2 style="text-align:center;">설정</h2>
+    <h2 style="text-align:center;">設定</h2>
     <div class="settings-grid">
       <div class="setting-item">
         <button class="setting-icon" onclick="openNicknameModal()">
-          <img src="images/nickname_icon.png" alt="닉네임 변경">
+          <img src="images/nickname_icon.png" alt="ニックネーム変更">
         </button>
-        <div class="setting-label">닉네임 변경</div>
+        <div class="setting-label">ニックネーム変更</div>
       </div>
       <div class="setting-item">
         <button class="setting-icon" onclick="openLanguageModal()">
-          <img src="images/lang_icon.png" alt="언어 선택">
+          <img src="images/lang_icon.png" alt="言語選択">
         </button>
-        <div class="setting-label">언어 선택</div>
+        <div class="setting-label">言語選択</div>
       </div>
       <div class="setting-item">
         <button class="setting-icon" onclick="openFriendModal()">
-          <img src="images/friend_icon.png" alt="친구 추가">
+          <img src="images/friend_icon.png" alt="友達追加">
         </button>
-        <div class="setting-label">친구 추가</div>
+        <div class="setting-label">友達追加</div>
       </div>
       <div class="setting-item">
         <button class="setting-icon" onclick="downloadMyData()">
-          <img src="images/download_icon.png" alt="내 데이터 다운로드">
+          <img src="images/download_icon.png" alt="データをダウンロード">
         </button>
-        <div class="setting-label">내 데이터 다운로드</div>
+        <div class="setting-label">データをダウンロード</div>
       </div>
       <div class="setting-item">
         <button class="setting-icon" onclick="openAccountModal()">
-          <img src="images/account_icon.png" alt="계정 설정">
+          <img src="images/account_icon.png" alt="アカウント設定">
         </button>
-        <div class="setting-label">계정 설정</div>
+        <div class="setting-label">アカウント設定</div>
       </div>
       <div class="setting-item">
         <button class="setting-icon" onclick="openActivityModal()">
-          <img src="images/activity_icon.png" alt="내 활동 내역 보기">
+          <img src="images/activity_icon.png" alt="アクティビティ履歴を見る">
         </button>
-        <div class="setting-label">내 활동 내역 보기</div>
+        <div class="setting-label">アクティビティ履歴を見る</div>
       </div>
     </div>
-    <button onclick="closeSettingsModal()" class="close-btn">닫기</button>
+    <button onclick="closeSettingsModal()" class="close-btn">閉じる</button>
   </div>
 </div>
 
@@ -185,10 +185,10 @@
 
 <div id="nicknameModal" class="popup-menu" style="display:none;">
   <div class="popup-content">
-    <h3>닉네임 변경</h3>
-    <input type="text" id="nicknameInput" placeholder="새 닉네임 입력" style="width:100%; padding:10px; font-size:16px;" />
-    <button onclick="saveNickname()" style="margin-top:10px;">저장</button>
-    <button onclick="closeNicknameModal()" class="close-btn">닫기</button>
+    <h3>ニックネームの変更</h3>
+    <input type="text" id="nicknameInput" placeholder="新しいニックネームを入力してください" style="width:100%; padding:10px; font-size:16px;" />
+    <button onclick="saveNickname()" style="margin-top:10px;">保存</button>
+    <button onclick="closeNicknameModal()" class="close-btn">閉じる</button>
   </div>
 </div>
 
@@ -211,14 +211,14 @@
       firebase.firestore().collection('nicknames').doc(user.uid).set({
         nickname: nickname
       }).then(() => {
-        alert('닉네임이 저장되었습니다.');
+        alert('ニックネームが保存されました。');
         closeNicknameModal();
       }).catch((error) => {
-        console.error('닉네임 저장 오류:', error);
-        alert('닉네임 저장 중 오류 발생.');
+        console.error('ニックネーム保存エラー:', error);
+        alert('ニックネームの保存中にエラーが発生しました。');
       });
     } else {
-      alert('닉네임을 입력하세요!');
+      alert('ニックネームを入力してください！');
     }
   }
 </script>
