@@ -83,7 +83,7 @@ firebase.auth().onAuthStateChanged(user => {
         timeZone: 'UTC'
       })
     : '';
-  document.getElementById('profile-meta').textContent = `[가입] ${joinDate}`;
+  document.getElementById('profile-meta').textContent = `[登録] ${joinDate}`;
 
   } else { // 62번째 줄 쯤!
     // 로그아웃 상태
@@ -172,11 +172,11 @@ async function updateNickname() {
     // 4. 닉네임 컬렉션에 등록
     await nickRef.set({ uid: user.uid });
 
-    alert('닉네임이 변경되었습니다!');
+    alert('ニックネームが変更されました！');
     closeNicknameModal();
     location.reload();
   } catch (error) {
-    alert('변경 실패: ' + error.message);
+    alert('変更に失敗しました: ' + error.message);
   }
 }
 
@@ -195,7 +195,7 @@ function openFriendModal() {
   document.getElementById('friendModal').style.display = 'block';
 }
 function downloadMyData() {
-  alert('내 데이터 다운로드 기능 준비중!');
+  alert('自分のデータのダウンロード機能は準備中です！');
 }
 function openAccountModal() {
   document.getElementById('accountModal').style.display = 'block';
@@ -223,8 +223,8 @@ firebase.auth().onAuthStateChanged(function(user) {
 
       // 가입일 표시 (예전처럼)
       const createdAt = new Date(user.metadata.creationTime);
-      const joinDate = `${createdAt.getFullYear()}년 ${createdAt.getMonth() + 1}월 ${createdAt.getDate()}일`;
-      document.getElementById("profile-meta").textContent = `[가입] ${joinDate}`;
+      const joinDate = `${createdAt.getFullYear()}年 ${createdAt.getMonth() + 1}月 ${createdAt.getDate()}日`;
+      document.getElementById("profile-meta").textContent = `[登録] ${joinDate}`;
       
       document.getElementById("profile-account-area").style.display = "flex";
     });
@@ -247,4 +247,4 @@ window.toggleSidebar = toggleSidebar;
     window.location.href = '/channel/community.html';
   };
 
-  tabPanel.innerHTML = `<b>설명</b>${data.desc ? data.desc.replace(/\n/g, "<br>") : "소개글이 없습니다."}`;
+  tabPanel.innerHTML = `<b>説明</b>${data.desc ? data.desc.replace(/\n/g, "<br>") : "紹介文がありません。"}`;
