@@ -2,10 +2,10 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon v0.3.2 - 202nd Milestone</title>
+  <title>Datinoon v0.3.2 - 203rd Milestone</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root { --main-border: 1.5px solid #000; }
+    :root { --main-border: 1.5px solid #000; --war-red: #ff4d4d; --war-blue: #4d94ff; }
     body { margin: 0; background: #fff; font-family: 'Pretendard', sans-serif; overflow-x: hidden; }
 
     /* 헤더 스타일 */
@@ -19,6 +19,13 @@
     .logo-img { height: 45px; cursor: pointer; }
     .menu-btn { font-size: 24px; cursor: pointer; background: none; border: none; font-weight: bold; }
 
+    /* 전쟁 모드 전환 버튼 */
+    .war-mode-btn {
+      background: #000; color: #fff; border: none; padding: 8px 15px;
+      font-weight: 900; cursor: pointer; font-size: 13px; transition: 0.2s;
+    }
+    .war-mode-btn:hover { background: var(--war-red); }
+
     .search-box { flex: 1; display: flex; justify-content: center; }
     #searchInput { width: 400px; padding: 10px; border: var(--main-border); outline: none; }
 
@@ -31,20 +38,16 @@
     }
     .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #000; margin-right: 8px; }
 
-    /* 드롭다운 메뉴 스타일 (image_11277e 참고) */
     .dropdown-menu {
       display: none; position: absolute; top: 50px; right: 0;
       width: 180px; background: #fff; border: var(--main-border);
       box-shadow: 4px 4px 0 #000; z-index: 1001;
     }
-    .dropdown-item {
-      padding: 12px 15px; font-weight: 900; font-size: 14px;
-      cursor: pointer; border-bottom: 1px solid #eee;
-    }
+    .dropdown-item { padding: 12px 15px; font-weight: 900; font-size: 14px; cursor: pointer; border-bottom: 1px solid #eee; }
     .dropdown-item:last-child { border-bottom: none; color: red; }
     .dropdown-item:hover { background: #f9f9f9; }
 
-    /* 그리드 레이아웃 */
+    /* 1번 화면: 커뮤니티 그리드 */
     .grid-container {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 25px; padding: 40px;
@@ -53,6 +56,16 @@
     .card:hover { transform: translateY(-5px); box-shadow: 5px 5px 0 #000; }
     .card-img-box { width: 100%; aspect-ratio: 1; border: var(--main-border); margin-bottom: 12px; overflow: hidden; }
     .card-img-box img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* 2번 화면: 영토 전쟁 지도 */
+    #war-map-view { display: none; padding: 40px; text-align: center; }
+    .map-canvas {
+      width: 100%; max-width: 900px; height: 600px; margin: 0 auto;
+      border: 3px solid #000; background: #f0f0f0; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 12px 12px 0 rgba(0,0,0,0.1);
+    }
+    .status-bar { display: flex; justify-content: space-around; margin-bottom: 20px; font-weight: 900; }
 
     /* 사이드바 */
     .sidebar {
@@ -69,7 +82,8 @@
 <header class="header">
   <div class="left-zone">
     <button class="menu-btn" onclick="toggleSidebar()">≡</button>
-    <img src="images/Datinoon 0.3.2.png" class="logo-img" onclick="location.reload()" onerror="this.src='https://via.placeholder.com/120x40?text=Datinoon'">
+    <img src="images/Datinoon 0.3.2.png" class="logo-img" onclick="goHome()" onerror="this.src='https://via.placeholder.com/120x40?text=Datinoon'">
+    <button class="war-mode-btn" id="mode-toggle-btn" onclick="toggleWarMode()">🗺️ 영토 전쟁 지도로</button>
   </div>
 
   <div class="search-box">
@@ -78,12 +92,10 @@
 
   <div class="user-zone">
     <div id="login-btn" class="login-text" onclick="handleGoogleLogin()">로그인</div>
-    
     <div id="user-profile" class="user-pill" onclick="toggleUserMenu(event)">
       <img id="user-img" src="" class="user-avatar">
       <b id="user-name" style="font-size:14px;">시민</b>
     </div>
-
     <div id="dropdown-menu" class="dropdown-menu">
       <div class="dropdown-item" onclick="location.href='/Datinoon/profile.html'">마이 프로필</div>
       <div class="dropdown-item" onclick="handleLogout()">로그아웃</div>
@@ -91,40 +103,75 @@
   </div>
 </header>
 
+<main id="community-view" class="grid-container">
+  <div class="card">
+    <div class="card-img-box"><img src="images/icon_sample.png" onerror="this.src='https://via.placeholder.com/200'"></div>
+    <div class="info"><b>대구 동성로 기록</b><br><small>2026.01.21</small></div>
+  </div>
+</main>
+
+<section id="war-map-view">
+  <div class="status-bar">
+    <div style="color: var(--war-blue);">🔵 다티눈 연맹: 45% 점령</div>
+    <div style="color: var(--war-red);">🔴 반란군: 12% 점령</div>
+    <div>⚪ 중립 지역: 43%</div>
+  </div>
+  <div class="map-canvas">
+    <div>
+      <h2 style="font-weight: 900; font-size: 30px;">대한민국 영토 전쟁 지도</h2>
+      <p>관리자님 위치: <b>대구광역시 (점령군: 다티눈 연맹)</b></p>
+      <button class="war-mode-btn" onclick="alert('현재 지역을 점령하시겠습니까?')">🚩 현재 위치 점령하기</button>
+    </div>
+  </div>
+</section>
+
 <aside class="sidebar" id="sidebar">
   <h2 style="font-weight:900;">Datinoon Menu</h2>
   <hr>
-  <p style="cursor:pointer; font-weight:900;">📁 채널 탐색</p>
+  <p style="cursor:pointer; font-weight:900;" onclick="goHome()">🏠 홈 그리드</p>
+  <p style="cursor:pointer; font-weight:900;" onclick="toggleWarMode()">⚔️ 영토 전쟁 상황</p>
   <p style="cursor:pointer; font-weight:900;">🎞️ 영상 보관함</p>
 </aside>
 <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
-
-<main class="grid-container">
-  <div class="card">
-    <div class="card-img-box"><img src="images/icon_sample.png" onerror="this.src='https://via.placeholder.com/200'"></div>
-    <div class="info"><b>비다!</b><br><small>2025.07.08</small></div>
-  </div>
-</main>
 
 <script>
   const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // 1. 사이드바 제어
+  // 화면 전환 로직 (때려박기 핵심)
+  function toggleWarMode() {
+    const commView = document.getElementById('community-view');
+    const mapView = document.getElementById('war-map-view');
+    const btn = document.getElementById('mode-toggle-btn');
+
+    if (mapView.style.display === 'none' || mapView.style.display === '') {
+      commView.style.display = 'none';
+      mapView.style.display = 'block';
+      btn.textContent = "🏠 커뮤니티 그리드로";
+    } else {
+      goHome();
+    }
+  }
+
+  function goHome() {
+    document.getElementById('community-view').style.display = 'grid';
+    document.getElementById('war-map-view').style.display = 'none';
+    document.getElementById('mode-toggle-btn').textContent = "🗺️ 영토 전쟁 지도로";
+  }
+
+  // 기존 기능 유지
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('active');
     document.getElementById('overlay').classList.toggle('active');
   }
 
-  // 2. 유저 메뉴(드롭다운) 제어
   function toggleUserMenu(event) {
-    event.stopPropagation(); // 클릭 이벤트 확산 방지
+    event.stopPropagation();
     const menu = document.getElementById('dropdown-menu');
     menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
   }
 
-  // 3. 구글 로그인 및 로그아웃
   async function handleGoogleLogin() {
     await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
@@ -137,25 +184,18 @@
     location.reload();
   }
 
-  // 4. 로그인 상태 감지
   supabaseClient.auth.onAuthStateChange((event, session) => {
     const btn = document.getElementById('login-btn');
     const profile = document.getElementById('user-profile');
     if (session) {
       btn.style.display = 'none';
       profile.style.display = 'flex';
-      document.getElementById('user-name').textContent = session.user.user_metadata.full_name;
+      document.getElementById('user-name').textContent = "🛡️ 기사 " + session.user.user_metadata.full_name;
       document.getElementById('user-img').src = session.user.user_metadata.avatar_url;
-    } else {
-      btn.style.display = 'block';
-      profile.style.display = 'none';
     }
   });
 
-  // 바탕 클릭 시 드롭다운 닫기
-  window.onclick = function() {
-    document.getElementById('dropdown-menu').style.display = 'none';
-  }
+  window.onclick = () => { document.getElementById('dropdown-menu').style.display = 'none'; }
 </script>
 </body>
 </html>
