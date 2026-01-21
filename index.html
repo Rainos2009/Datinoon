@@ -2,25 +2,30 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon v0.6.5 - Free Nation Era</title>
+  <title>Datinoon v0.6.9 - Empire Builder</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root { --main-border: 2px solid #000; --war-red: #ff4d4d; }
     body, html { margin: 0; padding: 0; height: 100%; font-family: 'Pretendard', sans-serif; overflow: hidden; }
+    
+    /* 헤더 스타일 보강 */
     .header { display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: var(--main-border); background: #fff; height: 70px; z-index: 2000; position: relative; }
+    
+    /* 유저 메뉴 스타일 (신분증 메뉴를 위해 필수) */
+    .user-zone { position: relative; display: flex; align-items: center; }
+    .user-pill { display: none; align-items: center; cursor: pointer; border: var(--main-border); padding: 5px 12px; background: #fff; margin-left: 10px; }
+    .user-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #000; margin-left: 10px; }
+    .dropdown-menu { display: none; position: absolute; top: 50px; right: 0; width: 160px; background: #fff; border: var(--main-border); box-shadow: 5px 5px 0 #000; z-index: 2001; }
+    .dropdown-item { padding: 12px; font-weight: 900; font-size: 13px; cursor: pointer; border-bottom: 1px solid #eee; }
+    .dropdown-item:hover { background: #f0f0f0; }
+
     #map { width: 100vw; height: calc(100vh - 70px); background: #000; }
     
     /* 게시판 레이어 */
-    #board-overlay { 
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-      background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center; 
-    }
-    .board-window { 
-      width: 90%; max-width: 500px; background: #fff; border: var(--main-border); 
-      padding: 20px; box-shadow: 10px 10px 0 #000; 
-    }
+    #board-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center; }
+    .board-window { width: 90%; max-width: 500px; background: #fff; border: var(--main-border); padding: 20px; box-shadow: 10px 10px 0 #000; }
     .close-btn { float: right; cursor: pointer; font-weight: 900; }
   </style>
 </head>
@@ -28,10 +33,26 @@
 
 <header class="header">
   <div style="display:flex; align-items:center;">
-    <img src="images/Datinoon 0.3.2.png" height="45" style="border:var(--main-border); cursor:pointer;" onclick="location.reload()">
-    <span style="margin-left:15px; font-weight:900;">🌍 자유 건국의 시대</span>
+    <img src="images/Datinoon 0.3.2.png" height="45" style="border:var(--main-border); cursor:pointer;" onclick="location.reload()" onerror="this.src='https://via.placeholder.com/120x40?text=Datinoon'">
+    <span style="margin-left:15px; font-weight:900;">🌍 제국 건설의 시대</span>
   </div>
-  <div id="user-info" style="font-weight:900;">로그인 중...</div>
+  
+  <div class="user-zone">
+    <div id="login-btn" style="cursor:pointer; font-weight:900; border:var(--main-border); padding:8px 15px;" onclick="handleGoogleLogin()">로그인</div>
+    
+    <div id="user-profile" class="user-pill" onclick="toggleUserMenu(event)">
+      <div style="text-align:right;">
+        <div id="user-rank" style="font-size:11px; font-weight:900; color:#4d94ff;">로딩 중</div>
+        <div id="user-display-name" style="font-size:14px; font-weight:900;">시민</div>
+      </div>
+      <img id="user-img" src="" class="user-avatar">
+    </div>
+
+    <div id="dropdown-menu" class="dropdown-menu">
+      <div class="dropdown-item" onclick="location.href='profile.html'">🪪 신분증 확인</div>
+      <div class="dropdown-item" onclick="handleLogout()" style="color:red;">🚪 로그아웃</div>
+    </div>
+  </div>
 </header>
 
 <div id="map"></div>
@@ -41,11 +62,9 @@
     <span class="close-btn" onclick="closeBoard()">[닫기]</span>
     <h2 id="board-title">국가 게시판</h2>
     <hr border="1">
-    <div id="post-list" style="height:200px; overflow-y:auto; margin-bottom:15px; font-size:14px;">
-      게시글이 없습니다.
-    </div>
-    <input id="post-input" type="text" placeholder="통치 선언문 입력..." style="width:70%; padding:5px;">
-    <button onclick="writePost()" style="width:25%; padding:5px; font-weight:900;">기록</button>
+    <div id="post-list" style="height:200px; overflow-y:auto; margin-bottom:15px; font-size:14px;">게시글 로딩 중...</div>
+    <input id="post-input" type="text" placeholder="메시지 입력..." style="width:70%; padding:5px;">
+    <button onclick="writePost()" style="width:20%; padding:5px; font-weight:900;">전송</button>
   </div>
 </div>
 
@@ -55,13 +74,38 @@
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let currentUser = null;
+  let currentRank = "시민";
   let currentPixelId = null;
   const PIXEL_SIZE = 0.01;
 
-  const map = L.map('map', { zoomControl: false }).setView([35.8714, 128.6014], 10);
+  const map = L.map('map', { zoomControl: false }).setView([35.8714, 128.6014], 10); // 대구/안동 근처
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 
-  // 국가 건설 및 게시판 진입 로직
+  // 1. 로그인 상태 감지 및 UI 업데이트 (로딩 멈춤 해결)
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if (session) {
+      currentUser = session.user.user_metadata;
+      document.getElementById('login-btn').style.display = 'none';
+      document.getElementById('user-profile').style.display = 'flex';
+      
+      // 일단 구글 정보로 즉시 표시 (기다리지 않음)
+      document.getElementById('user-display-name').textContent = currentUser.full_name;
+      document.getElementById('user-img').src = currentUser.avatar_url;
+
+      // DB에서 계급 가져오기 (실패 시 시민 유지)
+      try {
+        const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
+        if (profile) currentRank = profile.Rank;
+      } catch (e) { console.log("계급 로드 실패, 시민으로 설정"); }
+
+      document.getElementById('user-rank').textContent = `🏠 ${currentRank}`;
+      if (currentRank === '대통령') document.getElementById('user-rank').style.color = '#ff4d4d';
+      
+      loadTerritories();
+    }
+  });
+
+  // 2. 지도 클릭 로직: 무한 확장 적용 (팝업 제거)
   map.on('click', async function(e) {
     if (!currentUser) return alert("로그인이 필요합니다.");
     
@@ -69,55 +113,67 @@
     const lng = Math.floor(e.latlng.lng / PIXEL_SIZE) * PIXEL_SIZE;
     const pixelId = `${lat.toFixed(2)}_${lng.toFixed(2)}`;
 
-    // 1. 해당 땅이 이미 국가인지 확인
+    // 이미 남의 땅인지 확인
     const { data: nation } = await supabaseClient.from('territories').select('*').eq('id', pixelId).single();
 
     if (nation) {
-      // 이미 국가라면 게시판 열기
-      openBoard(pixelId, nation.owner_name);
+      openBoard(pixelId, nation.owner_name); // 게시판 열기
     } else {
-      // 빈 땅이면 누구나 국가 건설
-      if (confirm(`좌표 ${pixelId}에 국가를 세우시겠습니까?`)) {
+      // 내 땅이 하나라도 있는지 확인 (있으면 팝업 없이 즉시 점령)
+      const { data: myLand } = await supabaseClient.from('territories').select('id').eq('owner_name', currentUser.full_name).limit(1);
+      
+      if (myLand && myLand.length > 0) {
+        // [확장 모드] 묻지 않고 점령
         await supabaseClient.from('territories').insert([{ id: pixelId, lat, lng, owner_name: currentUser.full_name }]);
         drawPixel(lat, lng, currentUser.full_name, pixelId);
+      } else {
+        // [첫 건국] 건국 선포 확인
+        if (confirm(`🚩 ${pixelId} 좌표에 당신의 첫 국가를 선포하시겠습니까?`)) {
+          await supabaseClient.from('territories').insert([{ id: pixelId, lat, lng, owner_name: currentUser.full_name }]);
+          drawPixel(lat, lng, currentUser.full_name, pixelId);
+        }
       }
     }
   });
 
   function drawPixel(lat, lng, name, id) {
-    L.rectangle([[lat, lng], [lat + PIXEL_SIZE, lng + PIXEL_SIZE]], { color: "#ff4d4d", weight: 1, fillOpacity: 0.5, fillColor: "#ff4d4d" })
-     .addTo(map).bindTooltip(`${name}의 국가`);
+    const rect = L.rectangle([[lat, lng], [lat + PIXEL_SIZE, lng + PIXEL_SIZE]], { color: "#ff4d4d", weight: 1, fillOpacity: 0.5, fillColor: "#ff4d4d" }).addTo(map);
+    rect.bindTooltip(`${name}`);
+    rect.on('click', () => { /* 클릭 이벤트는 map.on에서 처리됨 */ });
   }
 
+  // 메뉴 토글 기능 (신분증 보이기)
+  function toggleUserMenu(e) { 
+    e.stopPropagation(); 
+    const menu = document.getElementById('dropdown-menu'); 
+    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block'; 
+  }
+  
+  // 화면 아무데나 누르면 메뉴 닫기
+  window.onclick = () => { document.getElementById('dropdown-menu').style.display = 'none'; }
+
+  // 게시판 관련 함수들
   function openBoard(id, name) {
     currentPixelId = id;
     document.getElementById('board-overlay').style.display = 'flex';
-    document.getElementById('board-title').textContent = `${name}의 국회`;
+    document.getElementById('board-title').textContent = `${name}의 영토`;
     loadPosts(id);
   }
-
   function closeBoard() { document.getElementById('board-overlay').style.display = 'none'; }
-
+  
   async function loadPosts(id) {
     const { data: posts } = await supabaseClient.from('pixel_posts').select('*').eq('pixel_id', id);
     const list = document.getElementById('post-list');
-    list.innerHTML = posts && posts.length ? posts.map(p => `<div><b>${p.author_name}</b>: ${p.content}</div>`).join('') : "기록이 없습니다.";
+    list.innerHTML = posts && posts.length ? posts.map(p => `<div style="padding:5px; border-bottom:1px solid #eee;"><b>${p.author_name}</b>: ${p.content}</div>`).join('') : "<div style='padding:10px; color:#888;'>아직 기록된 역사가 없습니다.</div>";
   }
 
   async function writePost() {
     const content = document.getElementById('post-input').value;
+    if(!content) return;
     await supabaseClient.from('pixel_posts').insert([{ pixel_id: currentPixelId, content, author_name: currentUser.full_name }]);
     document.getElementById('post-input').value = "";
     loadPosts(currentPixelId);
   }
-
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (session) {
-      currentUser = session.user.user_metadata;
-      document.getElementById('user-info').textContent = `🎖️ ${currentUser.full_name}`;
-      loadTerritories();
-    }
-  });
 
   async function loadTerritories() {
     const { data: list } = await supabaseClient.from('territories').select('*');
@@ -125,6 +181,7 @@
   }
 
   async function handleGoogleLogin() { await supabaseClient.auth.signInWithOAuth({ provider: 'google' }); }
+  async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
 </script>
 </body>
 </html>
