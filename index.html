@@ -2,41 +2,22 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon v0.4.5 - Global Pixel War</title>
+  <title>Datinoon v0.4.7 - Persistent Empire</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    :root { --main-border: 2px solid #000; --war-red: #ff4d4d; --exp-green: #2ecc71; }
+    :root { --main-border: 2px solid #000; --war-red: #ff4d4d; }
     body, html { margin: 0; padding: 0; height: 100%; font-family: 'Pretendard', sans-serif; overflow: hidden; }
-
-    /* 헤더 스타일 */
-    .header { 
-      display: flex; align-items: center; justify-content: space-between; 
-      padding: 0 30px; border-bottom: var(--main-border); background: #fff; 
-      height: 70px; position: relative; z-index: 2000;
-    }
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: var(--main-border); background: #fff; height: 70px; position: relative; z-index: 2000; }
     .logo-img { height: 45px; cursor: pointer; border: var(--main-border); }
-    
-    /* 유저 구역 및 드롭다운 */
     .user-zone { position: relative; }
     .user-pill { display: none; align-items: center; cursor: pointer; border: var(--main-border); padding: 5px 12px; background: #fff; }
     .user-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #000; margin-left: 10px; }
-    .dropdown-menu { 
-      display: none; position: absolute; top: 60px; right: 0; width: 180px; 
-      background: #fff; border: var(--main-border); box-shadow: 5px 5px 0 #000; z-index: 2001; 
-    }
+    .dropdown-menu { display: none; position: absolute; top: 60px; right: 0; width: 180px; background: #fff; border: var(--main-border); box-shadow: 5px 5px 0 #000; z-index: 2001; }
     .dropdown-item { padding: 12px; font-weight: 900; font-size: 13px; cursor: pointer; border-bottom: 1px solid #eee; }
-    .dropdown-item:hover { background: #f9f9f9; }
-
-    /* 메인 지도 구역 */
     #map { width: 100vw; height: calc(100vh - 70px); background: #000; }
-    
-    /* 대통령 전용 알림 창 */
-    .status-panel {
-      position: absolute; bottom: 30px; left: 30px; z-index: 1000;
-      background: #fff; border: var(--main-border); padding: 15px; box-shadow: 8px 8px 0 #000;
-    }
+    .status-panel { position: absolute; bottom: 30px; left: 30px; z-index: 1000; background: #fff; border: var(--main-border); padding: 15px; box-shadow: 8px 8px 0 #000; }
   </style>
 </head>
 <body>
@@ -45,7 +26,6 @@
   <div class="left-zone">
     <img src="images/Datinoon 0.3.2.png" class="logo-img" onclick="location.reload()" onerror="this.src='https://via.placeholder.com/120x40?text=Datinoon'">
   </div>
-  
   <div class="user-zone">
     <div id="login-btn" style="cursor:pointer; font-weight:900; border:var(--main-border); padding:8px 15px;" onclick="handleGoogleLogin()">로그인</div>
     <div id="user-profile" class="user-pill" onclick="toggleUserMenu(event)">
@@ -55,99 +35,91 @@
       </div>
       <img id="user-img" src="" class="user-avatar">
     </div>
-    
     <div id="dropdown-menu" class="dropdown-menu">
       <div class="dropdown-item" onclick="location.href='profile.html'">🪪 신분증 확인</div>
-      <div class="dropdown-item" onclick="alert('Lv.10 달성 시 승급 신청이 가능합니다!')">🎖️ 계급 승급 신청</div>
       <div class="dropdown-item" onclick="handleLogout()" style="color:red;">🚪 로그아웃</div>
     </div>
   </div>
 </header>
 
 <div id="map"></div>
-
-<div class="status-panel" id="admin-panel">
+<div class="status-panel">
   <div style="font-weight:900; font-size:1.1rem;">🚩 제국 작전 지휘부</div>
-  <div id="map-notice" style="font-size:0.9rem; margin-top:5px; color:#666;">전 세계 1픽셀 단위 점령 가능</div>
+  <div id="map-notice" style="font-size:0.9rem; margin-top:5px; color:#666;">실시간 저장 활성화됨</div>
 </div>
 
 <script>
-  // 1. Supabase 설정
   const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let currentRank = "시민";
-  const PIXEL_SIZE = 0.01; // 1픽셀 격자 크기
+  let currentUserName = "";
+  const PIXEL_SIZE = 0.01;
 
-  // 2. 지도 초기화 (전 세계 모드)
   const map = L.map('map', { zoomControl: false }).setView([35.8714, 128.6014], 5);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '© Datinoon Empire'
-  }).addTo(map);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 
-  // 3. 점령 클릭 이벤트 (1픽셀씩 국가 세우기)
+  // 1. 기존 점령 영토 불러오기
+  async function loadTerritories() {
+    const { data: territories } = await supabaseClient.from('territories').select('*');
+    if (territories) {
+      territories.forEach(t => drawPixel(t.lat, t.lng, t.owner_rank, t.owner_name));
+    }
+  }
+
+  // 2. 픽셀 그리기 함수
+  function drawPixel(lat, lng, rank, name) {
+    const bounds = [[lat, lng], [lat + PIXEL_SIZE, lng + PIXEL_SIZE]];
+    const color = "#ff0000"; // 모든 제국 영토는 붉은색
+    L.rectangle(bounds, { color: color, weight: 1, fillOpacity: 0.5, fillColor: color })
+     .addTo(map).bindPopup(`<b>점령지</b><br>지휘관: ${name} (${rank})`);
+  }
+
+  // 3. 점령 클릭 이벤트 및 실시간 저장
   map.on('click', async function(e) {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) return alert("로그인 후 영토를 점령하십시오!");
+    if (currentRank !== '군인' && currentRank !== '대통령') {
+      return alert("⚠️ 시민은 점령 권한이 없습니다. 군부의 승인을 받으십시오.");
+    }
 
     const lat = Math.floor(e.latlng.lat / PIXEL_SIZE) * PIXEL_SIZE;
     const lng = Math.floor(e.latlng.lng / PIXEL_SIZE) * PIXEL_SIZE;
 
-    // 픽셀 그리기 (지도 위 시각화)
-    const bounds = [[lat, lng], [lat + PIXEL_SIZE, lng + PIXEL_SIZE]];
-    const color = (currentRank === '대통령') ? '#ff0000' : '#4d94ff'; // 대통령은 붉은 영토
+    // DB 저장
+    const { error } = await supabaseClient.from('territories').insert([
+      { lat: lat, lng: lng, owner_name: currentUserName, owner_rank: currentRank }
+    ]);
 
-    L.rectangle(bounds, {
-      color: color, weight: 1, fillOpacity: 0.5, fillColor: color
-    }).addTo(map).bindPopup(`<b>점령 완료</b><br>계급: ${currentRank}`);
-
-    // 여기서 Supabase의 territories 테이블로 데이터를 보낼 수 있습니다.
-    console.log(`픽셀 점령: ${lat}, ${lng} by ${currentRank}`);
+    if (!error) {
+      drawPixel(lat, lng, currentRank, currentUserName);
+    } else {
+      console.error("저장 실패:", error);
+    }
   });
 
-  // 4. 로그인 및 프로필 연동
+  // 로그인 상태 및 프로필 로드
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session) {
       document.getElementById('login-btn').style.display = 'none';
       document.getElementById('user-profile').style.display = 'flex';
       document.getElementById('user-img').src = session.user.user_metadata.avatar_url;
-      
-      const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
+      currentUserName = session.user.user_metadata.full_name;
 
+      const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
       if (profile) {
         currentRank = profile.Rank;
         document.getElementById('user-rank').textContent = `🏠 ${profile.Rank}`;
-        document.getElementById('user-display-name').textContent = session.user.user_metadata.full_name;
-        
-        if(currentRank === '대통령') {
-            document.getElementById('user-rank').style.color = '#ff4d4d';
-        }
+        document.getElementById('user-display-name').textContent = currentUserName;
+        if(currentRank === '대통령') document.getElementById('user-rank').style.color = '#ff4d4d';
       }
+      loadTerritories(); // 로그인 후 데이터 로드
     }
   });
 
-  function toggleUserMenu(e) {
-    e.stopPropagation();
-    const menu = document.getElementById('dropdown-menu');
-    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-  }
-
-  async function handleGoogleLogin() {
-    await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/Datinoon/' } });
-  }
-
-  async function handleLogout() {
-    await supabaseClient.auth.signOut();
-    location.reload();
-  }
-
+  function toggleUserMenu(e) { e.stopPropagation(); const menu = document.getElementById('dropdown-menu'); menu.style.display = (menu.style.display === 'block') ? 'none' : 'block'; }
+  async function handleGoogleLogin() { await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/Datinoon/' } }); }
+  async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
   window.onclick = () => { document.getElementById('dropdown-menu').style.display = 'none'; }
 </script>
-
 </body>
 </html>
