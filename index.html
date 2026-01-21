@@ -2,37 +2,61 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon - 경로 수정 버전</title>
+  <title>Datinoon - Gallery System</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: 'Malgun Gothic', sans-serif; margin: 0; background: #fff; overflow-x: hidden; }
     .header { border-bottom: 2px solid #000; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; }
+    .logo-img { height: 40px; cursor: pointer; border: 1px solid #000; }
     .search-bar { border: 1px solid #000; padding: 5px 15px; width: 40%; max-width: 400px; }
-    .container { padding: 40px 50px; }
-    .board-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
-    .post-card { border: 2px solid #000; padding: 15px; display: flex; flex-direction: column; gap: 10px; min-height: 120px; }
+    
+    /* 갤러리 탭 스타일 */
+    .gallery-container { padding: 20px 50px 0 50px; display: flex; gap: 10px; }
+    .gallery-tab { 
+      padding: 8px 25px; border: 2px solid #000; background: #fff; 
+      font-weight: 900; cursor: pointer; transition: 0.2s;
+    }
+    .gallery-tab.active { background: #000; color: #fff; }
+    .gallery-tab:hover { background: #f0f0f0; }
+    .gallery-tab.active:hover { background: #000; }
+
+    .container { padding: 20px 50px; }
+    
+    /* 격자형 게시판 레이아웃 */
+    .board-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .post-card { border: 2px solid #000; padding: 15px; display: flex; flex-direction: column; gap: 10px; min-height: 140px; background: #fff; }
     .icon-box { width: 40px; height: 50px; border: 3px solid #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; }
-    .post-title { font-weight: bold; font-size: 16px; word-break: break-all; }
-    .post-date { color: #666; font-size: 11px; }
-    .write-btn { position: fixed; bottom: 30px; right: 30px; padding: 15px 30px; background: #000; color: #fff; font-weight: bold; cursor: pointer; border-radius: 50px; border: none; z-index: 1000; }
+    .post-title { font-weight: bold; font-size: 16px; word-break: break-all; min-height: 40px; }
+    .post-footer { border-top: 1px solid #eee; pt: 10px; margin-top: auto; }
+    .post-date { color: #888; font-size: 11px; margin-top: 5px; }
+
+    .write-btn { position: fixed; bottom: 30px; right: 30px; padding: 15px 35px; background: #000; color: #fff; font-weight: 900; cursor: pointer; border-radius: 50px; border: none; z-index: 1000; box-shadow: 5px 5px 0 #ccc; }
+    .write-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #ccc; }
   </style>
 </head>
 <body>
 
 <header class="header">
-  <img src="images/Datinoon_0.4.0.png" height="40" style="cursor:pointer;" onclick="location.reload()" onerror="this.src='https://via.placeholder.com/40x40?text=D'">
-  <input type="text" class="search-bar" placeholder="사진, 영상 혹은 레인 검색...">
+  <img src="https://rainos2009.github.io/Datinoon/images/Datinoon%200.3.2.png" class="logo-img" onclick="location.reload()" onerror="this.src='https://via.placeholder.com/120x40?text=Datinoon'">
+  <input type="text" class="search-bar" placeholder="갤러리 내 검색...">
   <div id="auth-area">
-    <button onclick="handleGoogleLogin()">로그인</button>
+    <button style="font-weight:900; cursor:pointer;" onclick="handleGoogleLogin()">로그인</button>
   </div>
 </header>
 
+<div class="gallery-container">
+  <div class="gallery-tab active" onclick="switchGallery('자유', this)">자유 갤러리</div>
+  <div class="gallery-tab" onclick="switchGallery('게임', this)">게임 갤러리</div>
+  <div class="gallery-tab" onclick="switchGallery('공지', this)">운영 공지</div>
+</div>
+
 <div class="container">
+  <h2 id="current-gallery-title" style="margin-bottom: 20px;">자유 갤러리</h2>
   <div id="board-grid" class="board-grid">
     </div>
 </div>
 
-<button id="write-trigger" class="write-btn" style="display:none;" onclick="showWritePrompt()">+ 새 글 작성</button>
+<button id="write-trigger" class="write-btn" style="display:none;" onclick="showWritePrompt()">+ 글쓰기</button>
 
 <script>
   const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
@@ -40,47 +64,71 @@
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let currentUser = null;
+  let activeGallery = '자유'; // 현재 선택된 갤러리
 
-  // 로그인 시 현재 주소를 정확히 전달하여 404 방지
+  // 로그인 처리
   async function handleGoogleLogin() { 
     await supabaseClient.auth.signInWithOAuth({ 
       provider: 'google',
-      options: {
-        redirectTo: window.location.href // 현재 index.html 주소로 정확히 복귀
-      }
+      options: { redirectTo: window.location.href }
     }); 
   }
 
+  // 상태 감지
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session) {
       currentUser = session.user.user_metadata;
-      document.getElementById('auth-area').innerHTML = `<span onclick="location.href='profile.html'" style="cursor:pointer; font-weight:bold;">🪪 신분증 확인</span>`;
+      document.getElementById('auth-area').innerHTML = `<span onclick="location.href='profile.html'" style="cursor:pointer; font-weight:bold;">🪪 ${currentUser.full_name}</span>`;
       document.getElementById('write-trigger').style.display = 'block';
       loadPosts();
     }
   });
 
-  async function showWritePrompt() {
-    const title = prompt("익명으로 남길 제목을 입력하세요:");
-    if (!title) return;
-    await supabaseClient.from('anonymous_posts').insert([{ content: title, author: "익명" }]);
+  // 갤러리 전환 함수
+  function switchGallery(galleryName, element) {
+    activeGallery = galleryName;
+    document.getElementById('current-gallery-title').textContent = galleryName + " 갤러리";
+    
+    // 탭 디자인 변경
+    document.querySelectorAll('.gallery-tab').forEach(t => t.classList.remove('active'));
+    element.classList.add('active');
+    
     loadPosts();
   }
 
+  // 글쓰기 창 (갤러리 정보 포함)
+  async function showWritePrompt() {
+    const title = prompt(`${activeGallery} 갤러리에 남길 내용을 입력하세요:`);
+    if (!title) return;
+    
+    await supabaseClient.from('anonymous_posts').insert([
+      { content: title, author: "익명", gallery_name: activeGallery }
+    ]);
+    loadPosts();
+  }
+
+  // 게시글 불러오기 (현재 갤러리 글만 필터링)
   async function loadPosts() {
-    const { data: posts } = await supabaseClient.from('anonymous_posts').select('*').order('created_at', { ascending: false });
+    const { data: posts, error } = await supabaseClient
+      .from('anonymous_posts')
+      .select('*')
+      .eq('gallery_name', activeGallery) // 핵심: 선택된 갤러리 글만 가져옴
+      .order('created_at', { ascending: false });
+
     const grid = document.getElementById('board-grid');
-    if (posts) {
+    if (posts && posts.length > 0) {
       grid.innerHTML = posts.map(p => `
         <div class="post-card">
           <div class="icon-box">0</div>
-          <div class="post-info">
-            <div class="post-title">${p.content}</div>
-            <div class="post-date">${new Date(p.created_at).toLocaleDateString()}</div>
-            <div class="post-date">익명 게시판</div>
+          <div class="post-title">${p.content}</div>
+          <div class="post-footer">
+            <div class="post-date">익명 | ${new Date(p.created_at).toLocaleDateString()}</div>
+            <div class="post-date" style="color:#000; font-weight:bold;">#${activeGallery}</div>
           </div>
         </div>
       `).join('');
+    } else {
+      grid.innerHTML = `<p style="color:#888;">이 갤러리에 첫 글을 남겨보세요!</p>`;
     }
   }
 </script>
