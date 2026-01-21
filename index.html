@@ -1,122 +1,130 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>Datinoon 0.3.2</title>
-  <link rel="stylesheet" href="style.css?v=0.3.2" />
+  <meta charset="UTF-8">
+  <title>Datinoon v0.3.2 - 200th Milestone</title>
   <style>
-    /* 깨진 레이아웃 긴급 수정 */
-    body { margin: 0; font-family: 'Pretendard', sans-serif; background: #f0f2f5; }
-    
+    /* 전체 레이아웃 및 굵은 선 스타일 복구 */
+    :root { --main-border: 3px solid #000; }
+    body { margin: 0; background: #fdfdfd; font-family: 'Pretendard', sans-serif; }
+
     .header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 20px; background: #fff; border-bottom: 4px solid #000;
+      padding: 10px 20px; background: #fff; border-bottom: var(--main-border);
       position: sticky; top: 0; z-index: 1000;
     }
 
-    .logo-box { border: 3px solid #000; background: #fff; padding: 2px; }
-    .logo { height: 45px; display: block; }
+    /* 로고 박스 복구 */
+    .logo-box { border: var(--main-border); background: #fff; padding: 2px 8px; display: flex; align-items: center; cursor: pointer; }
+    .logo-img { height: 45px; }
 
+    /* 검색창 스타일 */
     #searchInput {
-      width: 450px; padding: 10px; border: 3px solid #000;
-      font-weight: bold; outline: none;
+      width: 450px; padding: 12px; border: var(--main-border);
+      font-weight: bold; outline: none; font-size: 16px;
     }
 
-    /* 우측 상단 유저 박스 */
-    .account-area {
-      display: flex; align-items: center; border: 3px solid #000;
-      padding: 5px 12px; background: #fff; cursor: pointer; position: relative;
+    /* 버튼 스타일 */
+    .btn-heavy {
+      border: var(--main-border); background: #fff; padding: 8px 20px;
+      font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 #000;
     }
-    .profile-logo { width: 32px; height: 32px; border: 2px solid #000; margin-right: 8px; }
-    .profile-name { font-weight: 900; font-size: 15px; }
+    .btn-heavy:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
 
-    /* 팝업 메뉴: 계정 영역 바로 아래 배치 */
+    /* 사이드바 및 팝업 */
+    .sidebar {
+      position: fixed; left: -300px; top: 0; width: 280px; height: 100%;
+      background: #fff; border-right: var(--main-border); transition: 0.3s; z-index: 2000; padding: 20px;
+    }
+    .sidebar.active { left: 0; }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
+    .overlay.active { display: block; }
+
     .popup-menu {
-      display: none; position: absolute; top: 55px; right: 20px;
-      width: 180px; background: #fff; border: 3px solid #000;
-      box-shadow: 6px 6px 0 rgba(0,0,0,1); z-index: 2000;
+      display: none; position: absolute; top: 65px; right: 20px;
+      width: 200px; background: #fff; border: var(--main-border);
+      box-shadow: 5px 5px 0 #000; z-index: 1001;
     }
-    .popup-content ul { list-style: none; padding: 0; margin: 0; }
-    .popup-content li a {
-      display: block; padding: 12px; color: #000; text-decoration: none;
-      font-weight: bold; border-bottom: 2px solid #eee;
-    }
-    .popup-content li a:hover { background: #eee; }
 
-    /* 메인 영역 */
-    .main-content { padding: 40px 10%; }
+    /* 메인 소개 카드 */
     .intro-card {
-      background: #fff; border: 4px solid #000; padding: 30px;
-      box-shadow: 10px 10px 0 rgba(0,0,0,0.05); margin-bottom: 30px;
+      margin: 40px auto; width: 80%; border: var(--main-border);
+      padding: 30px; background: #fff; box-shadow: 8px 8px 0 rgba(0,0,0,0.05);
     }
-    .intro-card h2 { margin-top: 0; font-size: 28px; font-weight: 900; }
   </style>
 </head>
-
 <body>
 
 <header class="header">
-  <button class="hamburger" onclick="toggleSidebar()" style="font-size:24px; background:none; border:none; cursor:pointer;">≡</button>
+  <button class="btn-heavy" onclick="toggleSidebar()" style="font-size:20px; padding:5px 12px;">≡</button>
   
-  <div class="logo-box">
-    <img src="images/Rainos.png" class="logo" alt="Datinoon 0.3.2" />
+  <div class="logo-box" onclick="location.reload()">
+    <img src="images/Rainos.png" class="logo-img" alt="Logo" onerror="this.src='https://via.placeholder.com/150x50?text=Datinoon+0.3.2'">
   </div>
 
   <div class="center">
-    <input type="text" id="searchInput" placeholder="사진, 영상 혹은 레인 검색..." />
+    <input type="text" id="searchInput" placeholder="사진, 영상 혹은 레인 검색...">
   </div>
 
   <div class="right" style="position: relative;">
-    <button id="login-nav-btn" onclick="toggleLoginBox()" style="font-weight:900; padding:10px 20px; border:3px solid #000; background:#fff; cursor:pointer;">로그인</button>
+    <button id="login-nav-btn" class="btn-heavy" onclick="handleLoginClick()">로그인</button>
     
-    <div class="account-area" id="profile-account-area" style="display:none;" onclick="toggleMenu()">
-      <img src="images/Datinoon_Pro.png" class="profile-logo" id="profile-img">
-      <span class="profile-name" id="profile-name">사용자</span>
+    <div id="profile-area" style="display:none; align-items:center; cursor:pointer;" onclick="toggleMenu()">
+      <img src="images/Datinoon_Pro.png" id="profile-img" style="width:35px; border:2px solid #000; margin-right:10px;">
+      <span id="profile-name" style="font-weight:900;">사용자</span>
     </div>
 
     <div id="popup-menu" class="popup-menu">
-      <div class="popup-content">
-        <ul>
-          <li><a href="/Datinoon/profile.html">마이 프로필</a></li>
-          <li><a href="javascript:void(0)" onclick="openSettingsModal()">설정</a></li>
-          <li><a href="javascript:void(0)" onclick="handleLogout()">로그아웃</a></li>
-        </ul>
-      </div>
+      <div style="padding: 15px; font-weight: 900; border-bottom: 1px solid #eee; cursor: pointer;" onclick="location.href='/Datinoon/profile.html'">마이 프로필</div>
+      <div style="padding: 15px; font-weight: 900; color: red; cursor: pointer;" onclick="handleLogout()">로그아웃</div>
     </div>
   </div>
 </header>
 
-<main class="main-content">
-  <div class="intro-card">
-    <h2>Datinoon이란?</h2>
-    <p style="font-size: 18px; color: #444; font-weight: 500;">
-      누구나 사진과 영상을 공유하고 추억을 만드는 자유로운 커뮤니티입니다.
-    </p>
-  </div>
+<aside class="sidebar" id="sidebar">
+  <h2 style="font-weight: 900;">Datinoon Menu</h2>
+  <hr border="1">
+  <ul style="list-style:none; padding:0; line-height:3;">
+    <li><a href="#" style="text-decoration:none; color:#000; font-weight:900;">📁 채널 탐색</a></li>
+    <li><a href="#" style="text-decoration:none; color:#000; font-weight:900;">🎞️ 영상 보관함</a></li>
+  </ul>
+</aside>
+<div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
-  <div class="content-section">
-    <h2 style="font-weight: 900;">🔥 인기 콘텐츠</h2>
-    <div id="card-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
-      </div>
+<main>
+  <div class="intro-card">
+    <h1 style="margin:0 0 10px 0;">Datinoon이란?</h1>
+    <p style="font-weight:600; color:#444;">누구나 사진과 영상을 공유하고 추억을 만드는 자유로운 커뮤니티입니다.</p>
   </div>
 </main>
 
 <script>
-  // 메뉴 토글 함수 수정
+  // 1. 사이드바 토글 기능 복구
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('active');
+    document.getElementById('overlay').classList.toggle('active');
+  }
+
+  // 2. 유저 메뉴 토글 기능 복구
   function toggleMenu() {
     const menu = document.getElementById('popup-menu');
     menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
   }
 
-  // 화면 클릭 시 메뉴 닫기
+  // 3. 임시 로그인 처리 (테스트용)
+  function handleLoginClick() {
+    // 실제 Supabase 연동 전까지 UI 변화 테스트
+    document.getElementById('login-nav-btn').style.display = 'none';
+    document.getElementById('profile-area').style.display = 'flex';
+    alert("로그인 되었습니다! (200번 커밋 기념)");
+  }
+
+  // 화면 클릭 시 팝업 닫기
   window.onclick = function(event) {
     if (!event.target.closest('.right')) {
       document.getElementById('popup-menu').style.display = 'none';
     }
   }
-
-  // Supabase 로그인 상태 연동 (기존 로직 유지)
-  // ... (이전 코드의 supabaseClient.auth.onAuthStateChange 부분)
 </script>
 
 </body>
