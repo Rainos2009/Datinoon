@@ -2,42 +2,42 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon - Anonymous Board</title>
+  <title>Datinoon - 초기 계획 재현 버전</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: 'Pretendard', sans-serif; margin: 0; background: #f4f4f4; }
-    .header { background: #fff; padding: 20px 40px; display: flex; justify-content: space-between; border-bottom: 2px solid #000; align-items: center; }
-    .container { max-width: 800px; margin: 30px auto; padding: 20px; background: #fff; border: 2px solid #000; box-shadow: 10px 10px 0 #000; }
-    .post-input-area { margin-bottom: 30px; display: flex; gap: 10px; }
-    input { flex: 1; padding: 12px; border: 2px solid #000; font-size: 16px; }
-    button { padding: 12px 25px; background: #000; color: #fff; border: none; cursor: pointer; font-weight: bold; }
-    .post-item { padding: 15px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
-    .post-author { font-size: 12px; color: #666; }
+    body { font-family: 'Malgun Gothic', sans-serif; margin: 0; background: #fff; }
+    .header { border-bottom: 2px solid #000; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; }
+    .search-bar { border: 1px solid #000; padding: 5px 15px; width: 400px; }
+    
+    .container { padding: 40px 50px; }
+    /* 초안 이미지의 5열 격자 구조 재현 */
+    .board-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 25px; }
+    
+    .post-card { border: 2px solid #000; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+    .icon-box { width: 40px; height: 50px; border: 3px solid #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; }
+    .post-info { font-size: 13px; }
+    .post-title { font-weight: bold; font-size: 16px; margin-bottom: 3px; }
+    .post-date { color: #666; font-size: 11px; }
+
+    .write-btn { position: fixed; bottom: 30px; right: 30px; padding: 15px 30px; background: #000; color: #fff; font-weight: bold; cursor: pointer; border-radius: 50px; }
   </style>
 </head>
 <body>
 
 <header class="header">
-  <div style="display:flex; align-items:center;">
-    <img src="images/Datinoon 0.3.2.png" height="40" style="border:1px solid #000;" onclick="location.reload()">
-    <span style="margin-left:15px; font-weight:900; font-size:24px;">DATINOON BOARD</span>
-  </div>
+  <img src="images/Datinoon 0.1.png" height="40" style="cursor:pointer;" onclick="location.reload()">
+  <input type="text" class="search-bar" placeholder="사진, 영상 혹은 레인 검색...">
   <div id="auth-area">
-    <button onclick="handleGoogleLogin()">구글 로그인</button>
+    <button onclick="handleGoogleLogin()">로그인</button>
   </div>
 </header>
 
 <div class="container">
-  <div id="write-area" style="display:none;">
-    <div class="post-input-area">
-      <input id="post-content" type="text" placeholder="익명으로 메시지를 남기세요...">
-      <button onclick="writePost()">등록</button>
+  <div id="board-grid" class="board-grid">
     </div>
-  </div>
-  <div id="board-list">
-    <p style="text-align:center;">로그인 후 게시판을 확인하세요.</p>
-  </div>
 </div>
+
+<button id="write-trigger" class="write-btn" style="display:none;" onclick="showWritePrompt()">+ 새 글 작성</button>
 
 <script>
   const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
@@ -46,47 +46,39 @@
 
   let currentUser = null;
 
-  async function handleGoogleLogin() {
-    await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
-  }
+  async function handleGoogleLogin() { await supabaseClient.auth.signInWithOAuth({ provider: 'google' }); }
 
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session) {
       currentUser = session.user.user_metadata;
-      document.getElementById('auth-area').innerHTML = `
-        <span onclick="location.href='profile.html'" style="cursor:pointer; font-weight:bold;">🪪 신분증</span>
-        <button onclick="supabaseClient.auth.signOut()" style="margin-left:10px;">로그아웃</button>
-      `;
-      document.getElementById('write-area').style.display = 'block';
+      document.getElementById('auth-area').innerHTML = `<span onclick="location.href='profile.html'" style="cursor:pointer;">🪪 신분증 확인</span>`;
+      document.getElementById('write-trigger').style.display = 'block';
       loadPosts();
     }
   });
 
-  async function writePost() {
-    const content = document.getElementById('post-content').value;
-    if (!content) return;
-
-    const { error } = await supabaseClient.from('anonymous_posts').insert([{ 
-      content: content, 
-      author: "익명" 
-    }]);
-
-    if (!error) {
-      document.getElementById('post-content').value = "";
-      loadPosts();
-    } else {
-      alert("글쓰기 실패: " + error.message);
-    }
+  async function showWritePrompt() {
+    const title = prompt("제목을 입력하세요:");
+    if (!title) return;
+    
+    // 익명으로 저장하되, 서버에는 기록됨
+    await supabaseClient.from('anonymous_posts').insert([{ content: title, author: "익명" }]);
+    loadPosts();
   }
 
   async function loadPosts() {
     const { data: posts } = await supabaseClient.from('anonymous_posts').select('*').order('created_at', { ascending: false });
-    const list = document.getElementById('board-list');
+    const grid = document.getElementById('board-grid');
+    
     if (posts) {
-      list.innerHTML = posts.map(p => `
-        <div class="post-item">
-          <span>${p.content}</span>
-          <span class="post-author">작성일: ${new Date(p.created_at).toLocaleDateString()}</span>
+      grid.innerHTML = posts.map(p => `
+        <div class="post-card">
+          <div class="icon-box">0</div>
+          <div class="post-info">
+            <div class="post-title">${p.content}</div>
+            <div class="post-date">${new Date(p.created_at).toLocaleDateString()}</div>
+            <div class="post-date">익명 게시판</div>
+          </div>
         </div>
       `).join('');
     }
