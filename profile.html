@@ -3,159 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <title>채널 - Datinoon</title>
-  <link rel="stylesheet" href="style.css?v=0.2.7">
-
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* 계획도(Official) 스타일 반영을 위한 내부 CSS */
-    .profile-section {
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+    /* 계획도(Official) 스타일 */
+    :root { --main-border: 2px solid #000; }
+    body { margin: 0; background: #f8f9fa; font-family: 'Pretendard', sans-serif; overflow-x: hidden; }
 
-    /* 상단 프로필 영역: 한 줄 배치 */
-    .profile-header-wrapper {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 0;
+    /* 헤더 스타일 (메인과 통일) */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 30px; border-bottom: var(--main-border); background: #fff;
+      height: 60px; position: sticky; top: 0; z-index: 1000;
     }
+    .logo { height: 40px; cursor: pointer; border: var(--main-border); }
+    #searchInput { width: 300px; padding: 8px; border: var(--main-border); outline: none; }
 
-    .profile-main-info {
-      display: flex;
-      align-items: center;
-    }
+    .profile-section { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px; }
 
+    /* 상단 프로필 영역 */
+    .profile-header-wrapper { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
+    .profile-main-info { display: flex; align-items: center; }
     .profile-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 12px;
-      border: 3px solid #000; /* 굵은 테두리 강조 */
-      background: #fafafa;
-      margin-right: 20px;
-      object-fit: cover;
+      width: 80px; height: 80px; border-radius: 12px;
+      border: 3px solid #000; background: #fafafa;
+      margin-right: 20px; object-fit: cover;
     }
-
-    .nickname {
-      font-size: 2rem;
-      font-weight: 900; /* 아주 굵게 */
-      color: #000;
-    }
-
-    .profile-meta {
-      color: #888;
-      font-size: 1.1rem;
-      font-weight: bold;
-    }
+    .nickname { font-size: 2rem; font-weight: 900; color: #000; }
+    .profile-meta { color: #888; font-size: 1.1rem; font-weight: bold; }
 
     /* 버튼 그룹 */
-    .profile-actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
+    .profile-actions { display: flex; gap: 12px; align-items: center; }
     .action-btn {
-      background: linear-gradient(to bottom, #fff, #ddd); /* 입체감 */
-      border: 2px solid #000;
-      border-radius: 8px;
-      padding: 10px 25px;
-      font-weight: 900;
-      cursor: pointer;
-      box-shadow: 2px 2px 0 #000; /* 계획도 특유의 그림자 */
+      background: linear-gradient(to bottom, #fff, #ddd);
+      border: 2px solid #000; border-radius: 8px;
+      padding: 10px 25px; font-weight: 900; cursor: pointer;
+      box-shadow: 2px 2px 0 #000;
     }
+    .action-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
+    .logout-btn { color: #d14444; background: none; border: none; font-weight: 900; font-size: 1.1rem; cursor: pointer; margin-left: 10px; }
 
-    .action-btn:active {
-      transform: translate(1px, 1px);
-      box-shadow: 1px 1px 0 #000;
-    }
-
-    .logout-btn {
-      color: #d14444;
-      background: none;
-      border: none;
-      font-weight: 900;
-      font-size: 1.1rem;
-      cursor: pointer;
-      margin-left: 10px;
-    }
-
-    /* 탭 시스템: 계획도 사다리꼴 느낌 반영 */
-    .profile-tabs {
-      display: flex;
-      border-bottom: 4px solid #000;
-      margin-top: 30px;
-    }
-
+    /* 탭 시스템 */
+    .profile-tabs { display: flex; border-bottom: 4px solid #000; margin-top: 30px; }
     .tab {
-      flex: 1;
-      padding: 15px 0;
-      font-size: 1.2rem;
-      font-weight: 900;
-      border: 3px solid #000;
-      border-bottom: none;
-      background: #eee;
-      color: #aaa;
-      cursor: pointer;
-      margin-right: 5px;
-      text-align: center;
-      transition: 0.1s;
+      flex: 1; padding: 15px 0; font-size: 1.2rem; font-weight: 900;
+      border: 3px solid #000; border-bottom: none; background: #eee;
+      color: #aaa; cursor: pointer; margin-right: 5px; text-align: center;
     }
-
-    .tab.active {
-      background: #fff;
-      color: #000;
-      margin-bottom: -4px; /* 아래 선 덮기 */
-      padding-bottom: 19px;
-      z-index: 2;
-    }
+    .tab.active { background: #fff; color: #000; margin-bottom: -4px; padding-bottom: 19px; z-index: 2; }
 
     /* 컨텐츠 영역 */
-    .tab-content {
-      border: 3px solid #000;
-      border-top: none;
-      padding: 40px;
-      background: #fff;
-      min-height: 200px;
-      position: relative;
-    }
-
-    .desc-title {
-      font-size: 1.5rem;
-      font-weight: 900;
-      display: block;
-      margin-bottom: 15px;
-    }
-
-    #profile-desc {
-      font-size: 1.2rem;
-      line-height: 1.6;
-      font-weight: 600;
-    }
-
-    /* 설명 변경 버튼 (우측 상단 고정) */
-    .edit-desc-btn {
-      position: absolute;
-      right: 20px;
-      top: 20px;
-    }
+    .tab-content { border: 3px solid #000; border-top: none; padding: 40px; background: #fff; min-height: 200px; position: relative; }
+    .desc-title { font-size: 1.5rem; font-weight: 900; display: block; margin-bottom: 15px; }
+    #profile-desc { font-size: 1.2rem; line-height: 1.6; font-weight: 600; }
+    .edit-desc-btn { position: absolute; right: 20px; top: 20px; }
   </style>
 </head>
 <body>
 
   <header class="header">
-    <button class="hamburger" onclick="toggleSidebar()">≡</button>
-    <img src="images/Datinoon 0.3.2.png" class="logo" style="height:50px; border:1px solid #000;">
+    <button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="history.back()">≡</button>
+    <img src="images/Datinoon 0.3.2.png" class="logo" onclick="location.href='index.html'" onerror="this.src='https://via.placeholder.com/120x40?text=Datinoon'">
     <div class="center">
       <input type="text" id="searchInput" placeholder="사진, 영상 혹은 레인 검색...">
     </div>
-    <div class="right">
-       </div>
+    <div></div>
   </header>
 
   <section class="profile-section">
@@ -163,37 +74,40 @@
       <div class="profile-main-info">
         <img id="profile-img" src="images/default_avatar.png" class="profile-avatar" />
         <div class="profile-info">
-          <span class="nickname" id="profile-name">게스트</span><br />
-          <span class="profile-meta" id="profile-meta">[가입] -</span>
+          <span class="nickname" id="profile-name">불러오는 중...</span><br />
+          <span class="profile-meta" id="profile-meta">[계급] 시민</span>
         </div>
       </div>
       
       <div class="profile-actions">
-        <button class="action-btn" onclick="openUploadModal()">업로드</button>
-        <button class="action-btn">커뮤니티</button>
-        <button class="logout-btn" onclick="logout()">로그아웃</button>
+        <button class="action-btn" onclick="location.href='index.html'">전쟁 참여</button>
+        <button class="logout-btn" onclick="handleLogout()">로그아웃</button>
       </div>
     </div>
   
     <div class="profile-tabs">
-      <button class="tab active" id="tab-desc">설명</button>
-      <button class="tab" id="tab-schedule">일정</button>
-      <button class="tab" id="tab-member">커뮤니티 멤버 관리</button>
+      <button class="tab active" id="tab-desc">영토 보관함</button>
+      <button class="tab" id="tab-schedule">점령 일정</button>
+      <button class="tab" id="tab-member">관리</button>
     </div>
   
     <div class="tab-content" id="tab-panel-main">
-      <button class="action-btn edit-desc-btn" id="edit-btn">설명 변경</button>
-      <span class="desc-title" id="content-title">설명</span>
-      <p id="profile-desc">설명이 없습니다.</p>
+      <span class="desc-title" id="content-title">나의 영토</span>
+      <p id="profile-desc">아직 점령한 영토가 없습니다. 지도로 이동해 첫 깃발을 꽂으세요!</p>
     </div>
   </section>
 
   <script>
-    // 탭 전환 기능 (계획도 반영)
+    // Supabase 설정
+    const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 탭 기능
     const tabs = {
-      'tab-desc': { title: '설명', content: '로드 중...' },
-      'tab-schedule': { title: '일정', content: '여기에 일정 내용 표시' },
-      'tab-member': { title: '커뮤니티 멤버 관리', content: '멤버 관리 내용 표시' }
+      'tab-desc': { title: '나의 영토', content: '아직 점령한 영토가 없습니다.' },
+      'tab-schedule': { title: '점령 일정', content: '예정된 작전이 없습니다.' },
+      'tab-member': { title: '관리', content: '계정 관리 설정' }
     };
 
     Object.keys(tabs).forEach(id => {
@@ -201,31 +115,41 @@
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         this.classList.add('active');
         document.getElementById('content-title').innerText = tabs[id].title;
-        if(id === 'tab-desc') {
-           // 실제 데이터는 아래 firebase logic에서 채움
-        } else {
-           document.getElementById('profile-desc').innerHTML = tabs[id].content;
-        }
+        document.getElementById('profile-desc').innerHTML = tabs[id].content;
       };
     });
 
-    // Firebase Auth & Firestore 로직 (기존 코드 유지)
-    firebase.auth().onAuthStateChanged((user) => {
-      let uid = new URLSearchParams(window.location.search).get("uid");
-      if (!uid && user) uid = user.uid;
-      if (!uid) { window.location.href = "index.html"; return; }
+    // Supabase 데이터 불러오기
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        const user = session.user;
+        
+        // 1. UI에 기본 구글 정보 반영
+        document.getElementById("profile-name").textContent = user.user_metadata.full_name;
+        document.getElementById("profile-img").src = user.user_metadata.avatar_url;
 
-      firebase.firestore().collection("users").doc(uid).get().then(doc => {
-        if (doc.exists) {
-          const data = doc.data();
-          document.getElementById("profile-name").textContent = data.nickname || "게스트";
-          document.getElementById("profile-meta").textContent = `[가입] ${data.joinDate || '2025년 7월 10일'}`;
-          document.getElementById("profile-img").src = data.avatarUrl || "images/default_avatar.png";
-          document.getElementById("profile-desc").innerHTML = data.desc ? data.desc.replace(/\n/g, "<br>") : "소개글이 없습니다.";
-          tabs['tab-desc'].content = document.getElementById("profile-desc").innerHTML;
+        // 2. DB에서 계급 정보 가져오기
+        const { data: profile, error } = await supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (profile) {
+          document.getElementById("profile-meta").textContent = `[계급] ${profile.Rank} (Lv.${profile.Level || 1})`;
+          tabs['tab-desc'].content = `현재 경험치: ${profile.EXP} / 100<br>보유한 영토가 여기에 표시될 예정입니다.`;
+          document.getElementById("profile-desc").innerHTML = tabs['tab-desc'].content;
         }
-      });
+      } else {
+        // 로그인 안 되어 있으면 메인으로 이동
+        location.href = "index.html";
+      }
     });
+
+    async function handleLogout() {
+      await supabaseClient.auth.signOut();
+      location.href = "index.html";
+    }
   </script>
 </body>
 </html>
