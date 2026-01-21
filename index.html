@@ -2,30 +2,25 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon - 초기 계획 재현 버전</title>
+  <title>Datinoon - 경로 수정 버전</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: 'Malgun Gothic', sans-serif; margin: 0; background: #fff; }
+    body { font-family: 'Malgun Gothic', sans-serif; margin: 0; background: #fff; overflow-x: hidden; }
     .header { border-bottom: 2px solid #000; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; }
-    .search-bar { border: 1px solid #000; padding: 5px 15px; width: 400px; }
-    
+    .search-bar { border: 1px solid #000; padding: 5px 15px; width: 40%; max-width: 400px; }
     .container { padding: 40px 50px; }
-    /* 초안 이미지의 5열 격자 구조 재현 */
-    .board-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 25px; }
-    
-    .post-card { border: 2px solid #000; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+    .board-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
+    .post-card { border: 2px solid #000; padding: 15px; display: flex; flex-direction: column; gap: 10px; min-height: 120px; }
     .icon-box { width: 40px; height: 50px; border: 3px solid #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; }
-    .post-info { font-size: 13px; }
-    .post-title { font-weight: bold; font-size: 16px; margin-bottom: 3px; }
+    .post-title { font-weight: bold; font-size: 16px; word-break: break-all; }
     .post-date { color: #666; font-size: 11px; }
-
-    .write-btn { position: fixed; bottom: 30px; right: 30px; padding: 15px 30px; background: #000; color: #fff; font-weight: bold; cursor: pointer; border-radius: 50px; }
+    .write-btn { position: fixed; bottom: 30px; right: 30px; padding: 15px 30px; background: #000; color: #fff; font-weight: bold; cursor: pointer; border-radius: 50px; border: none; z-index: 1000; }
   </style>
 </head>
 <body>
 
 <header class="header">
-  <img src="images/Datinoon 0.1.png" height="40" style="cursor:pointer;" onclick="location.reload()">
+  <img src="https://rainos2009.github.io/Datinoon/images/Datinoon%200.3.2.png" height="40" style="cursor:pointer;" onclick="location.reload()" onerror="this.src='https://via.placeholder.com/40x40?text=D'">
   <input type="text" class="search-bar" placeholder="사진, 영상 혹은 레인 검색...">
   <div id="auth-area">
     <button onclick="handleGoogleLogin()">로그인</button>
@@ -46,22 +41,28 @@
 
   let currentUser = null;
 
-  async function handleGoogleLogin() { await supabaseClient.auth.signInWithOAuth({ provider: 'google' }); }
+  // 로그인 시 현재 주소를 정확히 전달하여 404 방지
+  async function handleGoogleLogin() { 
+    await supabaseClient.auth.signInWithOAuth({ 
+      provider: 'google',
+      options: {
+        redirectTo: window.location.href // 현재 index.html 주소로 정확히 복귀
+      }
+    }); 
+  }
 
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session) {
       currentUser = session.user.user_metadata;
-      document.getElementById('auth-area').innerHTML = `<span onclick="location.href='profile.html'" style="cursor:pointer;">🪪 신분증 확인</span>`;
+      document.getElementById('auth-area').innerHTML = `<span onclick="location.href='profile.html'" style="cursor:pointer; font-weight:bold;">🪪 신분증 확인</span>`;
       document.getElementById('write-trigger').style.display = 'block';
       loadPosts();
     }
   });
 
   async function showWritePrompt() {
-    const title = prompt("제목을 입력하세요:");
+    const title = prompt("익명으로 남길 제목을 입력하세요:");
     if (!title) return;
-    
-    // 익명으로 저장하되, 서버에는 기록됨
     await supabaseClient.from('anonymous_posts').insert([{ content: title, author: "익명" }]);
     loadPosts();
   }
@@ -69,7 +70,6 @@
   async function loadPosts() {
     const { data: posts } = await supabaseClient.from('anonymous_posts').select('*').order('created_at', { ascending: false });
     const grid = document.getElementById('board-grid');
-    
     if (posts) {
       grid.innerHTML = posts.map(p => `
         <div class="post-card">
