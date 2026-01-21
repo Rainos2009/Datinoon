@@ -1,3 +1,9 @@
+에러의 근본 원인은 supabase-config.js가 로드되기 전에 script.js가 실행되거나, 파일 간 변수 공유가 차단되어 supabase 객체를 찾지 못하는 것입니다.
+
+이 문제를 가장 확실하게 해결하는 방법은 파일을 나누지 않고 index.html 하나에 모든 기능을 합치는 것입니다. 아래 코드를 전체 복사해서 index.html에 덮어쓰기 하세요. SUPABASE_KEY 부분만 관리자님의 실제 키로 바꾸시면 바로 작동합니다.
+
+🛠️ 최종 통합본: index.html (전체 복사)
+HTML
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -117,8 +123,91 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./supabase-config.js"></script>
-<script src="./script.js"></script>
+
+<script>
+  // 1. Supabase 초기화 (설정 파일을 따로 쓰지 않고 직접 입력하여 오류 방지)
+  const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ'; // 관리자님의 실제 키를 복사해서 넣으세요!
+  
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // 2. 구글 로그인 실행
+  async function handleGoogleLogin() {
+    console.log("버튼 클릭됨: 구글 로그인 시도 중...");
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + window.location.pathname
+      }
+    });
+    if (error) alert("로그인 오류: " + error.message);
+  }
+
+  // 3. 로그아웃
+  async function handleLogout() {
+    await supabaseClient.auth.signOut();
+    alert("로그아웃 되었습니다.");
+    location.reload();
+  }
+
+  // 4. UI 제어 함수들
+  function toggleLoginBox() {
+    const box = document.getElementById("login-box");
+    box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
+  }
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("active");
+    document.getElementById("overlay").classList.toggle("active");
+  }
+  function openMenu() { document.getElementById('popup-menu').style.display = 'block'; }
+  function closeMenu() { document.getElementById('popup-menu').style.display = 'none'; }
+  function openSettingsModal() { document.getElementById('settingsModal').style.display = 'block'; }
+  function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
+  function openNicknameModal() { document.getElementById('nicknameModal').style.display = 'block'; }
+  function closeNicknameModal() { document.getElementById('nicknameModal').style.display = 'none'; }
+
+  // 5. 로그인 상태 확인 및 프로필 표시
+  document.addEventListener("DOMContentLoaded", () => {
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      const loginBtn = document.getElementById('login-nav-btn');
+      const profileArea = document.getElementById('profile-account-area');
+      const pName = document.getElementById('profile-name');
+      const pImg = document.getElementById('profile-img');
+
+      if (session) {
+        const user = session.user;
+        if (loginBtn) loginBtn.style.display = "none";
+        if (profileArea) profileArea.style.display = "flex";
+        if (pName) pName.textContent = user.user_metadata.full_name || user.email;
+        if (pImg && user.user_metadata.avatar_url) pImg.src = user.user_metadata.avatar_url;
+        console.log("로그인 성공 상태");
+      } else {
+        if (loginBtn) loginBtn.style.display = "block";
+        if (profileArea) profileArea.style.display = "none";
+      }
+    });
+  });
+
+  // 6. 닉네임 저장 기능
+  async function saveNickname() {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const newName = document.getElementById('nicknameInput').value;
+    if (!user) return alert("로그인이 필요합니다.");
+    
+    const { error } = await supabaseClient
+      .from('profiles')
+      .upsert({ id: user.id, nickname: newName });
+
+    if (error) alert("저장 실패: " + error.message);
+    else { alert("닉네임 변경 성공!"); location.reload(); }
+  }
+
+  // 함수들을 전역(window)에 등록하여 HTML에서 찾을 수 있게 함
+  window.handleGoogleLogin = handleGoogleLogin;
+  window.handleLogout = handleLogout;
+  window.toggleLoginBox = toggleLoginBox;
+  window.toggleSidebar = toggleSidebar;
+</script>
 
 </body>
 </html>
