@@ -5,19 +5,14 @@
   <title>Datinoon</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* 기존 스타일 유지 */
+    /* 유리 효과 카드 스타일 */
     .glass-card {
-      width: 300px;
-      height: 200px;
-      border-radius: 20px;
+      width: 300px; height: 200px; border-radius: 20px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-      padding: 16px;
-      color: #fff;
-      transition: transform 0.3s ease;
+      padding: 16px; color: #fff; transition: transform 0.3s ease;
     }
     .glass-card:hover { transform: translateY(-4px); }
   </style>
@@ -36,8 +31,8 @@
   </div>
   <div class="right">
     <button id="login-nav-btn" onclick="toggleLoginBox()" style="font-size:17px;">로그인</button>
-    <div class="account-area" id="profile-account-area" style="display:none;" onclick="openMenu()">
-      <img src="images/Datinoon_Pro.png" class="profile-logo">
+    <div class="account-area" id="profile-account-area" style="display:none; cursor:pointer;" onclick="openMenu()">
+      <img src="images/Datinoon_Pro.png" class="profile-logo" id="profile-img">
       <div class="profile-info">
         <span class="profile-name" id="profile-name"></span>
         <span class="profile-meta" id="profile-meta"></span>
@@ -73,8 +68,8 @@
     <div class="popup-content">
       <ul>
         <li><a href="/Datinoon/profile.html">마이 프로필</a></li>
-        <li><a href="#" onclick="openSettingsModal()">설정</a></li>
-        <li><a href="#" onclick="handleLogout()">로그아웃</a></li>
+        <li><a href="javascript:void(0)" onclick="openSettingsModal()">설정</a></li>
+        <li><a href="javascript:void(0)" onclick="handleLogout()">로그아웃</a></li>
       </ul>
       <button onclick="closeMenu()" class="close-btn">닫기</button>
     </div>
@@ -87,22 +82,21 @@
 
   <section class="sample-content">
     <h2>🔥 인기 콘텐츠</h2>
-    <div class="card-list" id="card-list">
-      </div>
+    <div class="card-list" id="card-list"></div>
   </section>
 </main>
 
-<div id="login-box" style="display:none;">
+<div id="login-box" style="display:none;" class="modal-overlay">
   <div class="login-content">
     <img src="images/Datinoon_0.3.1.png" style="width:160px; margin: 28px 0 18px 0;">
     <div style="font-size: 16px; color:#333; margin-bottom:18px;">
       Datinoon에 오신 것을 환영합니다.<br>구글 계정으로 로그인해주세요.
     </div>
-    <button id="google-login-btn" onclick="handleGoogleLogin()" style="width:220px; height:44px; font-size:17px; cursor:pointer;">
-      <img src="images/Google_LOGO.png" style="width:22px; margin-right:10px; vertical-align:middle;">
+    <button id="google-login-btn" onclick="handleGoogleLogin()" style="width:220px; height:44px; font-size:17px; cursor:pointer; display: flex; align-items: center; justify-content: center; margin: 0 auto; border: 1px solid #ccc; background: #fff; border-radius: 5px;">
+      <img src="images/Google_LOGO.png" style="width:20px; margin-right:10px;">
       Google로 로그인
     </button>
-    <button onclick="toggleLoginBox()" style="margin-top:18px; background:none; border:none; cursor:pointer;">✖ 닫기</button>
+    <button onclick="toggleLoginBox()" style="margin-top:18px; background:none; border:none; cursor:pointer; color: #888;">✖ 닫기</button>
   </div>
 </div>
 
@@ -126,21 +120,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="script.js"></script>
-
-<script>
-  // UI 제어용 간단한 함수들
-  function toggleSidebar() { document.getElementById("sidebar").classList.toggle("active"); }
-  function toggleLoginBox() { 
-    const box = document.getElementById("login-box");
-    box.style.display = box.style.display === "none" ? "block" : "none"; 
-  }
-  function openSettingsModal() { document.getElementById('settingsModal').style.display = 'block'; }
-  function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
-  function openNicknameModal() { document.getElementById('nicknameModal').style.display = 'block'; }
-  function closeNicknameModal() { document.getElementById('nicknameModal').style.display = 'none'; }
-  function openMenu() { document.getElementById('popup-menu').style.display = 'block'; }
-  function closeMenu() { document.getElementById('popup-menu').style.display = 'none'; }
-</script>
 
 </body>
 </html>
