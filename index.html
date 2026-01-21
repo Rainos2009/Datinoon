@@ -6,13 +6,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root { --main-border: 1.5px solid #000; }
-    body { margin: 0; background: #fff; font-family: 'Pretendard', sans-serif; }
+    body { margin: 0; background: #fff; font-family: 'Pretendard', sans-serif; overflow-x: hidden; }
 
-    /* 헤더: 사이드바 버튼과 로고 이미지 복구 */
+    /* 헤더 스타일 */
     .header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 30px; border-bottom: var(--main-border); background: #fff;
-      position: sticky; top: 0; z-index: 1000;
+      position: sticky; top: 0; z-index: 1000; height: 70px;
     }
 
     .left-zone { display: flex; align-items: center; gap: 15px; }
@@ -22,13 +22,29 @@
     .search-box { flex: 1; display: flex; justify-content: center; }
     #searchInput { width: 400px; padding: 10px; border: var(--main-border); outline: none; }
 
-    /* 로그인 및 프로필 영역 */
+    /* 유저 및 로그인 영역 */
     .user-zone { position: relative; }
-    .login-btn { font-weight: 800; cursor: pointer; border: var(--main-border); padding: 5px 15px; }
-    .user-pill { display: none; align-items: center; cursor: pointer; border: var(--main-border); padding: 4px 10px; }
+    .login-text { font-weight: 900; cursor: pointer; border: var(--main-border); padding: 5px 15px; }
+    .user-pill { 
+      display: none; align-items: center; cursor: pointer; 
+      border: var(--main-border); padding: 4px 10px; background: #fff;
+    }
     .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #000; margin-right: 8px; }
 
-    /* 초기 1안 그리드 레이아웃 (image_119ec2) */
+    /* 드롭다운 메뉴 스타일 (image_11277e 참고) */
+    .dropdown-menu {
+      display: none; position: absolute; top: 50px; right: 0;
+      width: 180px; background: #fff; border: var(--main-border);
+      box-shadow: 4px 4px 0 #000; z-index: 1001;
+    }
+    .dropdown-item {
+      padding: 12px 15px; font-weight: 900; font-size: 14px;
+      cursor: pointer; border-bottom: 1px solid #eee;
+    }
+    .dropdown-item:last-child { border-bottom: none; color: red; }
+    .dropdown-item:hover { background: #f9f9f9; }
+
+    /* 그리드 레이아웃 */
     .grid-container {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 25px; padding: 40px;
@@ -53,7 +69,7 @@
 <header class="header">
   <div class="left-zone">
     <button class="menu-btn" onclick="toggleSidebar()">≡</button>
-    <img src="images/Datinoon 0.3.2.png" class="logo-img" onclick="location.reload()">
+    <img src="images/Datinoon 0.3.2.png" class="logo-img" onclick="location.reload()" onerror="this.src='https://via.placeholder.com/120x40?text=Datinoon'">
   </div>
 
   <div class="search-box">
@@ -61,10 +77,16 @@
   </div>
 
   <div class="user-zone">
-    <div id="login-btn" class="login-text" onclick="handleGoogleLogin()" style="cursor:pointer; font-weight:900;">로그인</div>
-    <div id="user-profile" class="user-pill" onclick="toggleMenu()">
+    <div id="login-btn" class="login-text" onclick="handleGoogleLogin()">로그인</div>
+    
+    <div id="user-profile" class="user-pill" onclick="toggleUserMenu(event)">
       <img id="user-img" src="" class="user-avatar">
       <b id="user-name" style="font-size:14px;">시민</b>
+    </div>
+
+    <div id="dropdown-menu" class="dropdown-menu">
+      <div class="dropdown-item" onclick="location.href='/Datinoon/profile.html'">마이 프로필</div>
+      <div class="dropdown-item" onclick="handleLogout()">로그아웃</div>
     </div>
   </div>
 </header>
@@ -72,14 +94,14 @@
 <aside class="sidebar" id="sidebar">
   <h2 style="font-weight:900;">Datinoon Menu</h2>
   <hr>
-  <p>📁 채널 탐색</p>
-  <p>🎞️ 영상 보관함</p>
+  <p style="cursor:pointer; font-weight:900;">📁 채널 탐색</p>
+  <p style="cursor:pointer; font-weight:900;">🎞️ 영상 보관함</p>
 </aside>
 <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
 <main class="grid-container">
   <div class="card">
-    <div class="card-img-box"><img src="images/icon_sample.png"></div>
+    <div class="card-img-box"><img src="images/icon_sample.png" onerror="this.src='https://via.placeholder.com/200'"></div>
     <div class="info"><b>비다!</b><br><small>2025.07.08</small></div>
   </div>
 </main>
@@ -89,12 +111,20 @@
   const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // 모든 기능 함수들 복구
+  // 1. 사이드바 제어
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('active');
     document.getElementById('overlay').classList.toggle('active');
   }
 
+  // 2. 유저 메뉴(드롭다운) 제어
+  function toggleUserMenu(event) {
+    event.stopPropagation(); // 클릭 이벤트 확산 방지
+    const menu = document.getElementById('dropdown-menu');
+    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+  }
+
+  // 3. 구글 로그인 및 로그아웃
   async function handleGoogleLogin() {
     await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
@@ -102,6 +132,12 @@
     });
   }
 
+  async function handleLogout() {
+    await supabaseClient.auth.signOut();
+    location.reload();
+  }
+
+  // 4. 로그인 상태 감지
   supabaseClient.auth.onAuthStateChange((event, session) => {
     const btn = document.getElementById('login-btn');
     const profile = document.getElementById('user-profile');
@@ -115,6 +151,11 @@
       profile.style.display = 'none';
     }
   });
+
+  // 바탕 클릭 시 드롭다운 닫기
+  window.onclick = function() {
+    document.getElementById('dropdown-menu').style.display = 'none';
+  }
 </script>
 </body>
 </html>
