@@ -2,146 +2,136 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>채널 - Datinoon</title>
+  <title>신분증 - Datinoon</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* 계획도(Official) 스타일 */
     :root { --main-border: 2px solid #000; }
     body { margin: 0; background: #f8f9fa; font-family: 'Pretendard', sans-serif; overflow-x: hidden; }
 
-    /* 헤더 스타일 (메인과 통일) */
     .header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 30px; border-bottom: var(--main-border); background: #fff;
       height: 60px; position: sticky; top: 0; z-index: 1000;
     }
     .logo { height: 40px; cursor: pointer; border: var(--main-border); }
-    #searchInput { width: 300px; padding: 8px; border: var(--main-border); outline: none; }
 
-    .profile-section { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .profile-section { width: 100%; max-width: 800px; margin: 40px auto; padding: 20px; }
 
-    /* 상단 프로필 영역 */
-    .profile-header-wrapper { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
-    .profile-main-info { display: flex; align-items: center; }
+    /* 신분증 카드 스타일 */
+    .id-card {
+      background: #fff; border: 3px solid #000; padding: 30px;
+      box-shadow: 10px 10px 0 #000; position: relative;
+    }
+    .profile-main-info { display: flex; align-items: center; margin-bottom: 30px; }
     .profile-avatar {
-      width: 80px; height: 80px; border-radius: 12px;
-      border: 3px solid #000; background: #fafafa;
-      margin-right: 20px; object-fit: cover;
+      width: 100px; height: 100px; border-radius: 12px;
+      border: 3px solid #000; margin-right: 25px; object-fit: cover;
     }
-    .nickname { font-size: 2rem; font-weight: 900; color: #000; }
-    .profile-meta { color: #888; font-size: 1.1rem; font-weight: bold; }
-
-    /* 버튼 그룹 */
-    .profile-actions { display: flex; gap: 12px; align-items: center; }
-    .action-btn {
-      background: linear-gradient(to bottom, #fff, #ddd);
-      border: 2px solid #000; border-radius: 8px;
-      padding: 10px 25px; font-weight: 900; cursor: pointer;
-      box-shadow: 2px 2px 0 #000;
+    .nickname { font-size: 2.2rem; font-weight: 900; color: #000; margin: 0; }
+    .rank-badge { 
+      display: inline-block; background: #000; color: #fff; 
+      padding: 5px 12px; font-size: 1rem; margin-top: 5px; font-weight: 900;
     }
-    .action-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
-    .logout-btn { color: #d14444; background: none; border: none; font-weight: 900; font-size: 1.1rem; cursor: pointer; margin-left: 10px; }
 
-    /* 탭 시스템 */
-    .profile-tabs { display: flex; border-bottom: 4px solid #000; margin-top: 30px; }
-    .tab {
-      flex: 1; padding: 15px 0; font-size: 1.2rem; font-weight: 900;
-      border: 3px solid #000; border-bottom: none; background: #eee;
-      color: #aaa; cursor: pointer; margin-right: 5px; text-align: center;
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-top: 2px solid #eee; pt: 20px; margin-top: 20px; }
+    .info-item { display: flex; flex-direction: column; }
+    .info-label { font-size: 0.8rem; color: #888; font-weight: 900; margin-bottom: 5px; }
+    .info-value { font-size: 1.2rem; font-weight: 900; color: #000; }
+
+    .exp-bar-container { width: 100%; height: 15px; background: #eee; border: 2px solid #000; margin-top: 10px; overflow: hidden; }
+    .exp-bar-fill { height: 100%; background: #2ecc71; width: 0%; transition: 0.5s; }
+
+    .action-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; }
+    .btn { 
+      border: 2px solid #000; padding: 10px 20px; font-weight: 900; 
+      cursor: pointer; background: #fff; box-shadow: 3px 3px 0 #000;
     }
-    .tab.active { background: #fff; color: #000; margin-bottom: -4px; padding-bottom: 19px; z-index: 2; }
-
-    /* 컨텐츠 영역 */
-    .tab-content { border: 3px solid #000; border-top: none; padding: 40px; background: #fff; min-height: 200px; position: relative; }
-    .desc-title { font-size: 1.5rem; font-weight: 900; display: block; margin-bottom: 15px; }
-    #profile-desc { font-size: 1.2rem; line-height: 1.6; font-weight: 600; }
-    .edit-desc-btn { position: absolute; right: 20px; top: 20px; }
+    .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
+    .logout-btn { color: #ff4d4d; border-color: #ff4d4d; }
   </style>
 </head>
 <body>
 
   <header class="header">
-    <button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="history.back()">≡</button>
+    <button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="location.href='index.html'">🏠</button>
     <img src="images/Datinoon 0.3.2.png" class="logo" onclick="location.href='index.html'" onerror="this.src='https://via.placeholder.com/120x40?text=Datinoon'">
-    <div class="center">
-      <input type="text" id="searchInput" placeholder="사진, 영상 혹은 레인 검색...">
-    </div>
     <div></div>
   </header>
 
   <section class="profile-section">
-    <div class="profile-header-wrapper">
+    <div class="id-card">
       <div class="profile-main-info">
         <img id="profile-img" src="images/default_avatar.png" class="profile-avatar" />
-        <div class="profile-info">
-          <span class="nickname" id="profile-name">불러오는 중...</span><br />
-          <span class="profile-meta" id="profile-meta">[계급] 시민</span>
+        <div>
+          <h1 id="profile-name" class="nickname">불러오는 중...</h1>
+          <div id="profile-rank" class="rank-badge">시민</div>
         </div>
       </div>
-      
-      <div class="profile-actions">
-        <button class="action-btn" onclick="location.href='index.html'">전쟁 참여</button>
-        <button class="logout-btn" onclick="handleLogout()">로그아웃</button>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">국가 숙련도 (LEVEL)</span>
+          <span id="profile-level" class="info-value">Lv.1</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">소속</span>
+          <span class="info-value">다티눈 정규군</span>
+        </div>
       </div>
-    </div>
-  
-    <div class="profile-tabs">
-      <button class="tab active" id="tab-desc">영토 보관함</button>
-      <button class="tab" id="tab-schedule">점령 일정</button>
-      <button class="tab" id="tab-member">관리</button>
-    </div>
-  
-    <div class="tab-content" id="tab-panel-main">
-      <span class="desc-title" id="content-title">나의 영토</span>
-      <p id="profile-desc">아직 점령한 영토가 없습니다. 지도로 이동해 첫 깃발을 꽂으세요!</p>
+
+      <div style="margin-top: 25px;">
+        <span class="info-label">다음 계급까지 경험치 (EXP)</span>
+        <div class="exp-bar-container">
+          <div id="profile-exp-bar" class="exp-bar-fill"></div>
+        </div>
+        <p style="font-size: 0.9rem; text-align: right; margin-top: 5px; font-weight: bold;">
+          <span id="exp-text">0</span> / 100
+        </p>
+      </div>
+
+      <p style="margin-top: 20px; font-size: 0.85rem; color: #666; font-style: italic;">
+        * 영토 점령 현황은 '영토 전쟁 지도'에서 실시간으로 확인 가능합니다.
+      </p>
+
+      <div class="action-group">
+        <button class="btn" onclick="location.href='index.html'">전쟁 지도로 이동</button>
+        <button class="btn logout-btn" onclick="handleLogout()">로그아웃</button>
+      </div>
     </div>
   </section>
 
   <script>
-    // Supabase 설정
     const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // 탭 기능
-    const tabs = {
-      'tab-desc': { title: '나의 영토', content: '아직 점령한 영토가 없습니다.' },
-      'tab-schedule': { title: '점령 일정', content: '예정된 작전이 없습니다.' },
-      'tab-member': { title: '관리', content: '계정 관리 설정' }
-    };
-
-    Object.keys(tabs).forEach(id => {
-      document.getElementById(id).onclick = function() {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-        document.getElementById('content-title').innerText = tabs[id].title;
-        document.getElementById('profile-desc').innerHTML = tabs[id].content;
-      };
-    });
-
-    // Supabase 데이터 불러오기
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if (session) {
         const user = session.user;
-        
-        // 1. UI에 기본 구글 정보 반영
         document.getElementById("profile-name").textContent = user.user_metadata.full_name;
         document.getElementById("profile-img").src = user.user_metadata.avatar_url;
 
-        // 2. DB에서 계급 정보 가져오기
-        const { data: profile, error } = await supabaseClient
+        // DB에서 계급 및 경험치 조회
+        const { data: profile } = await supabaseClient
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .single();
 
         if (profile) {
-          document.getElementById("profile-meta").textContent = `[계급] ${profile.Rank} (Lv.${profile.Level || 1})`;
-          tabs['tab-desc'].content = `현재 경험치: ${profile.EXP} / 100<br>보유한 영토가 여기에 표시될 예정입니다.`;
-          document.getElementById("profile-desc").innerHTML = tabs['tab-desc'].content;
+          document.getElementById("profile-rank").textContent = profile.Rank;
+          document.getElementById("profile-level").textContent = `Lv.${profile.Level || 1}`;
+          document.getElementById("exp-text").textContent = profile.EXP;
+          document.getElementById("profile-exp-bar").style.width = (profile.EXP % 100) + "%";
+          
+          // 대통령일 경우 카드 색상 강조
+          if (profile.Rank === '대통령') {
+            document.querySelector('.id-card').style.borderColor = '#ffD700'; // 황금색
+            document.getElementById("profile-rank").style.background = '#ffD700';
+            document.getElementById("profile-rank").style.color = '#000';
+          }
         }
       } else {
-        // 로그인 안 되어 있으면 메인으로 이동
         location.href = "index.html";
       }
     });
