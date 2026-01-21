@@ -2,61 +2,95 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon - Original Mode</title>
+  <title>Datinoon - Anonymous Board</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    :root { --main-border: 2px solid #000; }
-    body, html { margin: 0; padding: 0; height: 100%; font-family: 'Pretendard', sans-serif; overflow: hidden; }
-    .header { display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: var(--main-border); background: #fff; height: 70px; z-index: 2000; position: relative; }
-    #map { width: 100vw; height: calc(100vh - 70px); }
-    .login-btn { padding: 10px 20px; background: #4285F4; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    body { font-family: 'Pretendard', sans-serif; margin: 0; background: #f4f4f4; }
+    .header { background: #fff; padding: 20px 40px; display: flex; justify-content: space-between; border-bottom: 2px solid #000; align-items: center; }
+    .container { max-width: 800px; margin: 30px auto; padding: 20px; background: #fff; border: 2px solid #000; box-shadow: 10px 10px 0 #000; }
+    .post-input-area { margin-bottom: 30px; display: flex; gap: 10px; }
+    input { flex: 1; padding: 12px; border: 2px solid #000; font-size: 16px; }
+    button { padding: 12px 25px; background: #000; color: #fff; border: none; cursor: pointer; font-weight: bold; }
+    .post-item { padding: 15px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
+    .post-author { font-size: 12px; color: #666; }
   </style>
 </head>
 <body>
 
 <header class="header">
   <div style="display:flex; align-items:center;">
-    <img src="images/Datinoon 0.3.2.png" height="45" style="border:var(--main-border);" onclick="location.reload()">
-    <span style="margin-left:15px; font-weight:900; font-size:20px;">DATINOON</span>
+    <img src="images/Datinoon 0.3.2.png" height="40" style="border:1px solid #000;" onclick="location.reload()">
+    <span style="margin-left:15px; font-weight:900; font-size:24px;">DATINOON BOARD</span>
   </div>
   <div id="auth-area">
-    <button class="login-btn" onclick="handleGoogleLogin()">구글로 로그인</button>
+    <button onclick="handleGoogleLogin()">구글 로그인</button>
   </div>
 </header>
 
-<div id="map"></div>
+<div class="container">
+  <div id="write-area" style="display:none;">
+    <div class="post-input-area">
+      <input id="post-content" type="text" placeholder="익명으로 메시지를 남기세요...">
+      <button onclick="writePost()">등록</button>
+    </div>
+  </div>
+  <div id="board-list">
+    <p style="text-align:center;">로그인 후 게시판을 확인하세요.</p>
+  </div>
+</div>
 
 <script>
   const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const map = L.map('map').setView([35.8714, 128.6014], 13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  let currentUser = null;
 
-  // 구글 로그인 함수
   async function handleGoogleLogin() {
-    const { error } = await supabaseClient.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin }
-    });
-    if (error) alert("로그인 오류: " + error.message);
+    await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
   }
 
-  // 로그인 상태 감지 및 UI 변경
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    const authArea = document.getElementById('auth-area');
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session) {
-      const user = session.user.user_metadata;
-      authArea.innerHTML = `
-        <span style="font-weight:bold; margin-right:15px;">${user.full_name} 사령관님</span>
-        <span style="cursor:pointer;" onclick="location.href='profile.html'">🪪 신분증</span>
+      currentUser = session.user.user_metadata;
+      document.getElementById('auth-area').innerHTML = `
+        <span onclick="location.href='profile.html'" style="cursor:pointer; font-weight:bold;">🪪 신분증</span>
         <button onclick="supabaseClient.auth.signOut()" style="margin-left:10px;">로그아웃</button>
       `;
+      document.getElementById('write-area').style.display = 'block';
+      loadPosts();
     }
   });
+
+  async function writePost() {
+    const content = document.getElementById('post-content').value;
+    if (!content) return;
+
+    const { error } = await supabaseClient.from('anonymous_posts').insert([{ 
+      content: content, 
+      author: "익명" 
+    }]);
+
+    if (!error) {
+      document.getElementById('post-content').value = "";
+      loadPosts();
+    } else {
+      alert("글쓰기 실패: " + error.message);
+    }
+  }
+
+  async function loadPosts() {
+    const { data: posts } = await supabaseClient.from('anonymous_posts').select('*').order('created_at', { ascending: false });
+    const list = document.getElementById('board-list');
+    if (posts) {
+      list.innerHTML = posts.map(p => `
+        <div class="post-item">
+          <span>${p.content}</span>
+          <span class="post-author">작성일: ${new Date(p.created_at).toLocaleDateString()}</span>
+        </div>
+      `).join('');
+    }
+  }
 </script>
 </body>
 </html>
