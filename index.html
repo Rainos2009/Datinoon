@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon - Admin System</title>
+  <title>Datinoon - Gallery System</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: 'Malgun Gothic', sans-serif; margin: 0; background: #fff; overflow-x: hidden; }
@@ -23,9 +23,7 @@
     .post-footer { border-top: 1px solid #eee; pt: 10px; margin-top: auto; }
     .post-date { color: #888; font-size: 11px; margin-top: 5px; }
 
-    /* 관리자 전용 삭제 버튼 스타일 */
     .delete-btn { background: red; color: white; border: none; font-size: 10px; padding: 2px 5px; cursor: pointer; font-weight: bold; margin-top: 5px; }
-
     .write-btn { position: fixed; bottom: 30px; right: 30px; padding: 15px 35px; background: #000; color: #fff; font-weight: 900; cursor: pointer; border-radius: 50px; border: none; z-index: 1000; box-shadow: 5px 5px 0 #ccc; }
   </style>
 </head>
@@ -57,11 +55,14 @@
   const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // ★ 관리자 이메일 설정 (대통령님 이메일로 수정하세요) ★
   const ADMIN_EMAIL = 'sopkqlql@gmail.com'; 
-
   let currentUser = null;
   let activeGallery = '자유';
+
+  // ★ 페이지 로드 시 즉시 글 목록을 불러옴 (비로그인 유저용)
+  window.onload = () => {
+    loadPosts();
+  };
 
   async function handleGoogleLogin() { 
     await supabaseClient.auth.signInWithOAuth({ 
@@ -72,11 +73,16 @@
 
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session) {
-      currentUser = session.user; // 전체 세션 저장
+      currentUser = session.user;
       document.getElementById('auth-area').innerHTML = `<span onclick="location.href='profile.html'" style="cursor:pointer; font-weight:bold;">🪪 ${currentUser.user_metadata.full_name}</span>`;
-      document.getElementById('write-trigger').style.display = 'block';
-      loadPosts();
+      document.getElementById('write-trigger').style.display = 'block'; // 로그인하면 글쓰기 버튼 등장
+    } else {
+      currentUser = null;
+      document.getElementById('auth-area').innerHTML = `<button style="font-weight:900; cursor:pointer;" onclick="handleGoogleLogin()">로그인</button>`;
+      document.getElementById('write-trigger').style.display = 'none'; // 로그아웃하면 버튼 숨김
     }
+    // 상태 변경 시에도 목록 갱신
+    loadPosts();
   });
 
   function switchGallery(galleryName, element) {
@@ -88,7 +94,6 @@
   }
 
   async function showWritePrompt() {
-    // 1. 공지사항 작성 제한
     if (activeGallery === '운영 공지' && currentUser.email !== ADMIN_EMAIL) {
       alert("공지사항은 최고 관리자만 작성할 수 있습니다.");
       return;
@@ -103,7 +108,6 @@
     loadPosts();
   }
 
-  // 2. 게시글 삭제 함수
   async function deletePost(postId) {
     if (confirm("최고 관리자 권한으로 이 글을 삭제하시겠습니까?")) {
       await supabaseClient.from('anonymous_posts').delete().eq('id', postId);
@@ -121,8 +125,9 @@
     const grid = document.getElementById('board-grid');
     if (posts && posts.length > 0) {
       grid.innerHTML = posts.map(p => {
-        // 관리자에게만 보이는 삭제 버튼
-        const deleteHtml = (currentUser && currentUser.email === ADMIN_EMAIL) 
+        // 사령관님(ADMIN_EMAIL)으로 로그인했을 때만 삭제 버튼 표시
+        const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
+        const deleteHtml = isAdmin 
           ? `<button class="delete-btn" onclick="deletePost('${p.id}')">삭제</button>` 
           : '';
 
