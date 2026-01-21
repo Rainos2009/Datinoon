@@ -2,32 +2,24 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon v0.5.0 - Empire Integrated</title>
+  <title>Datinoon v0.5.2 - Empire Integrated</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    :root { --main-border: 2px solid #000; --war-red: #ff4d4d; --exp-green: #2ecc71; }
+    :root { --main-border: 2px solid #000; --war-red: #ff4d4d; }
     body, html { margin: 0; padding: 0; height: 100%; font-family: 'Pretendard', sans-serif; overflow-x: hidden; }
-
-    /* 헤더 */
     .header { display: flex; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: var(--main-border); background: #fff; height: 70px; position: sticky; top: 0; z-index: 2000; }
     .logo-img { height: 45px; cursor: pointer; border: var(--main-border); }
     .war-mode-btn { background: #000; color: #fff; border: none; padding: 10px 20px; font-weight: 900; cursor: pointer; margin-left: 15px; }
-
-    /* 뷰 전환 */
     #community-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 30px; }
     #war-map-view { display: none; width: 100vw; height: calc(100vh - 70px); position: relative; }
     #map { width: 100%; height: 100%; background: #000; }
-
-    /* 유저 메뉴 */
     .user-zone { position: relative; }
     .user-pill { display: none; align-items: center; cursor: pointer; border: var(--main-border); padding: 5px 12px; background: #fff; }
     .user-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #000; margin-left: 10px; }
     .dropdown-menu { display: none; position: absolute; top: 60px; right: 0; width: 180px; background: #fff; border: var(--main-border); box-shadow: 5px 5px 0 #000; z-index: 2001; }
     .dropdown-item { padding: 12px; font-weight: 900; font-size: 13px; cursor: pointer; border-bottom: 1px solid #eee; }
-
-    /* 전략 UI */
     .status-panel { position: absolute; bottom: 30px; left: 30px; z-index: 1000; background: #fff; border: var(--main-border); padding: 15px; box-shadow: 8px 8px 0 #000; }
     .energy-bar { width: 100px; height: 10px; background: #eee; border: 1px solid #000; margin-top: 5px; }
     .energy-fill { width: 100%; height: 100%; background: #f1c40f; transition: 0.3s; }
@@ -37,15 +29,14 @@
 
 <header class="header">
   <div style="display:flex; align-items:center;">
-    <img src="images/Datinoon 0.3.2.png" class="logo-img" onclick="location.reload()" onerror="this.src='https://via.placeholder.com/120x40?text=Datinoon'">
+    <img src="images/Datinoon 0.3.2.png" class="logo-img" onclick="location.reload()">
     <button class="war-mode-btn" id="view-toggle-btn" onclick="toggleView()">🗺️ 영토 전쟁 지도로</button>
   </div>
-  
   <div class="user-zone">
     <div id="login-btn" style="cursor:pointer; font-weight:900; border:var(--main-border); padding:8px 15px;" onclick="handleGoogleLogin()">로그인</div>
     <div id="user-profile" class="user-pill" onclick="toggleUserMenu(event)">
       <div style="text-align:right;">
-        <div id="user-rank" style="font-size:11px; font-weight:900; color:#4d94ff;">불러오는 중...</div>
+        <div id="user-rank" style="font-size:11px; font-weight:900; color:#4d94ff;">조회 중...</div>
         <div id="user-display-name" style="font-size:14px; font-weight:900;">시민</div>
       </div>
       <img id="user-img" src="" class="user-avatar">
@@ -58,18 +49,15 @@
 </header>
 
 <main id="community-view">
-  <div style="border:var(--main-border); padding:40px; text-align:center; cursor:pointer;" onclick="alert('경험치 획득!')">
-    <b>📸 사진 올리고 점령하기</b><br><small>커뮤니티 활동 구역</small>
-  </div>
+  <div style="border:var(--main-border); padding:40px; text-align:center;"><b>📸 사진 올리고 점령하기</b></div>
 </main>
 
 <section id="war-map-view">
   <div id="map"></div>
   <div class="status-panel">
     <div style="font-weight:900;">🚩 제국 작전 지휘부</div>
-    <div style="font-size:0.8rem; margin-top:5px;">군사 기력 (Energy)</div>
     <div class="energy-bar"><div id="energy-fill" class="energy-fill"></div></div>
-    <div id="stat-text" style="font-size:0.8rem; margin-top:5px; font-weight:bold;">기력: 100 / 공격력: ??</div>
+    <div id="stat-text" style="font-size:0.8rem; margin-top:5px; font-weight:bold;">기력: 100 / 공격력: 10</div>
   </div>
 </section>
 
@@ -84,72 +72,60 @@
   let myPower = 10;
   const PIXEL_SIZE = 0.01;
 
-  // 화면 전환 로직
+  const map = L.map('map', { zoomControl: false }).setView([35.8714, 128.6014], 5);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
   function toggleView() {
     const comm = document.getElementById('community-view');
     const war = document.getElementById('war-map-view');
     const btn = document.getElementById('view-toggle-btn');
-
     if (comm.style.display !== 'none') {
-      comm.style.display = 'none';
-      war.style.display = 'block';
-      btn.textContent = "🏠 홈 그리드로";
-      setTimeout(() => map.invalidateSize(), 100); // 지도 깨짐 방지
+      comm.style.display = 'none'; war.style.display = 'block'; btn.textContent = "🏠 홈 그리드로";
+      setTimeout(() => { map.invalidateSize(); loadTerritories(); }, 200);
     } else {
-      comm.style.display = 'grid';
-      war.style.display = 'none';
-      btn.textContent = "🗺️ 영토 전쟁 지도로";
+      comm.style.display = 'grid'; war.style.display = 'none'; btn.textContent = "🗺️ 영토 전쟁 지도로";
     }
   }
 
-  // 지도 및 점령 로직 (v0.4.7과 동일하게 DB 연동)
-  const map = L.map('map', { zoomControl: false }).setView([35.8714, 128.6014], 5);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-
-  map.on('click', async function(e) {
-    if (currentRank !== '군인' && currentRank !== '대통령') return alert("⚠️ 군인만 점령 가능!");
-    if (myEnergy < 10) return alert("🚨 기력 부족!");
-
-    const lat = Math.floor(e.latlng.lat / PIXEL_SIZE) * PIXEL_SIZE;
-    const lng = Math.floor(e.latlng.lng / PIXEL_SIZE) * PIXEL_SIZE;
-
-    const { error } = await supabaseClient.from('territories').insert([
-      { lat, lng, owner_name: currentUserName, owner_rank: currentRank }
-    ]);
-
-    if (!error) {
-      myEnergy -= 10;
-      updateUI();
-      drawPixel(lat, lng, currentRank, currentUserName);
-    }
-  });
+  async function loadTerritories() {
+    const { data: territories } = await supabaseClient.from('territories').select('*');
+    if (territories) territories.forEach(t => drawPixel(t.lat, t.lng, t.owner_rank, t.owner_name));
+  }
 
   function drawPixel(lat, lng, rank, name) {
     const bounds = [[lat, lng], [lat + PIXEL_SIZE, lng + PIXEL_SIZE]];
-    L.rectangle(bounds, { color: "#ff0000", weight: 1, fillOpacity: 0.5, fillColor: "#ff0000" })
+    L.rectangle(bounds, { color: "#ff4d4d", weight: 1, fillOpacity: 0.5, fillColor: "#ff4d4d" })
      .addTo(map).bindPopup(`<b>점령지</b><br>지휘관: ${name} (${rank})`);
   }
+
+  map.on('click', async function(e) {
+    if (currentRank !== '군인' && currentRank !== '대통령') return alert("⚠️ 군부의 승인이 필요합니다.");
+    if (myEnergy < 10) return alert("🚨 보급 대기 중 (기력 부족)");
+    const lat = Math.floor(e.latlng.lat / PIXEL_SIZE) * PIXEL_SIZE;
+    const lng = Math.floor(e.latlng.lng / PIXEL_SIZE) * PIXEL_SIZE;
+    const { error } = await supabaseClient.from('territories').insert([{ lat, lng, owner_name: currentUserName, owner_rank: currentRank }]);
+    if (!error) { myEnergy -= 10; updateUI(); drawPixel(lat, lng, currentRank, currentUserName); }
+  });
 
   function updateUI() {
     document.getElementById('energy-fill').style.width = myEnergy + "%";
     document.getElementById('stat-text').textContent = `기력: ${myEnergy} / 공격력: ${myPower}`;
   }
 
-  // 로그인 및 데이터 로드
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session) {
       document.getElementById('login-btn').style.display = 'none';
       document.getElementById('user-profile').style.display = 'flex';
+      currentUserName = session.user.user_metadata.full_name;
+      document.getElementById('user-display-name').textContent = currentUserName;
+      document.getElementById('user-img').src = session.user.user_metadata.avatar_url;
+
       const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
-      if (profile) {
-        currentRank = profile.Rank;
-        currentUserName = session.user.user_metadata.full_name;
-        myPower = (currentRank === '대통령') ? 999 : 10;
-        document.getElementById('user-rank').textContent = `🏠 ${profile.Rank}`;
-        document.getElementById('user-display-name').textContent = currentUserName;
-        document.getElementById('user-img').src = session.user.user_metadata.avatar_url;
-        updateUI();
-      }
+      currentRank = profile ? profile.Rank : "시민";
+      myPower = (currentRank === '대통령') ? 999 : 10;
+      document.getElementById('user-rank').textContent = `🏠 ${currentRank}`;
+      if(currentRank === '대통령') document.getElementById('user-rank').style.color = '#ff4d4d';
+      updateUI();
     }
   });
 
