@@ -2,68 +2,35 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon v0.3.2 - Empire System</title>
+  <title>Datinoon v0.3.5 - Empire System (Real-DB)</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    /* 기존 스타일 유지 */
     :root { --main-border: 1.5px solid #000; --war-red: #ff4d4d; --war-blue: #4d94ff; --exp-green: #2ecc71; }
     body { margin: 0; background: #fff; font-family: 'Pretendard', sans-serif; overflow-x: hidden; }
-
-    /* 헤더 */
-    .header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 30px; border-bottom: var(--main-border); background: #fff;
-      position: sticky; top: 0; z-index: 1000; height: 70px;
-    }
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 30px; border-bottom: var(--main-border); background: #fff; position: sticky; top: 0; z-index: 1000; height: 70px; }
     .left-zone { display: flex; align-items: center; gap: 15px; }
     .logo-img { height: 45px; cursor: pointer; }
     .menu-btn { font-size: 24px; cursor: pointer; background: none; border: none; font-weight: bold; }
-
-    /* 모드 전환 버튼 */
-    .war-mode-btn {
-      background: #000; color: #fff; border: none; padding: 8px 15px;
-      font-weight: 900; cursor: pointer; font-size: 13px; transition: 0.2s;
-    }
+    .war-mode-btn { background: #000; color: #fff; border: none; padding: 8px 15px; font-weight: 900; cursor: pointer; font-size: 13px; transition: 0.2s; }
     .war-mode-btn:hover { background: var(--war-red); }
-
     .search-box { flex: 1; display: flex; justify-content: center; }
     #searchInput { width: 350px; padding: 10px; border: var(--main-border); outline: none; }
-
-    /* 유저 프로필 & 경험치 바 영역 */
     .user-zone { position: relative; }
     .login-text { font-weight: 900; cursor: pointer; border: var(--main-border); padding: 5px 15px; }
-    
-    .user-pill { 
-      display: none; align-items: center; cursor: pointer; 
-      border: var(--main-border); padding: 5px 12px; background: #fff;
-    }
+    .user-pill { display: none; align-items: center; cursor: pointer; border: var(--main-border); padding: 5px 12px; background: #fff; }
     .user-info-text { display: flex; flex-direction: column; align-items: flex-end; margin-right: 10px; }
     .rank-tag { font-size: 11px; font-weight: 900; color: var(--war-blue); margin-bottom: 2px; }
     .user-name { font-size: 14px; font-weight: 900; }
-    
     .exp-container { width: 80px; height: 5px; background: #eee; border: 1px solid #000; margin-top: 4px; overflow: hidden; }
-    .exp-fill { width: 40%; height: 100%; background: var(--exp-green); transition: 0.5s; }
-    
+    .exp-fill { width: 0%; height: 100%; background: var(--exp-green); transition: 0.5s; }
     .user-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #000; }
-
-    /* 드롭다운 */
-    .dropdown-menu {
-      display: none; position: absolute; top: 60px; right: 0;
-      width: 200px; background: #fff; border: var(--main-border);
-      box-shadow: 4px 4px 0 #000; z-index: 1001;
-    }
+    .dropdown-menu { display: none; position: absolute; top: 60px; right: 0; width: 200px; background: #fff; border: var(--main-border); box-shadow: 4px 4px 0 #000; z-index: 1001; }
     .dropdown-item { padding: 12px 15px; font-weight: 900; font-size: 13px; cursor: pointer; border-bottom: 1px solid #eee; }
     .dropdown-item:hover { background: #f9f9f9; }
-
-    /* 화면 섹션 */
     .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; padding: 40px; }
     #war-map-view { display: none; padding: 40px; text-align: center; }
-    .map-canvas {
-      width: 100%; max-width: 900px; height: 550px; margin: 0 auto;
-      border: 3px solid #000; background: #f0f0f0; display: flex; align-items: center; justify-content: center;
-      box-shadow: 10px 10px 0 #000; flex-direction: column;
-    }
-
-    /* 사이드바 */
+    .map-canvas { width: 100%; max-width: 900px; height: 550px; margin: 0 auto; border: 3px solid #000; background: #f0f0f0; display: flex; align-items: center; justify-content: center; box-shadow: 10px 10px 0 #000; flex-direction: column; }
     .sidebar { position: fixed; left: -300px; top: 0; width: 280px; height: 100%; background: #fff; border-right: var(--main-border); transition: 0.3s; z-index: 2000; padding: 25px; }
     .sidebar.active { left: 0; }
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1500; }
@@ -78,26 +45,19 @@
     <img src="images/Datinoon 0.3.2.png" class="logo-img" onclick="goHome()" onerror="this.src='https://via.placeholder.com/120x40?text=Datinoon'">
     <button class="war-mode-btn" id="mode-toggle-btn" onclick="toggleWarMode()">🗺️ 영토 전쟁 지도로</button>
   </div>
-
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="영토, 유저, 기록 검색...">
-  </div>
-
+  <div class="search-box"><input type="text" id="searchInput" placeholder="영토, 유저, 기록 검색..."></div>
   <div class="user-zone">
     <div id="login-btn" class="login-text" onclick="handleGoogleLogin()">로그인</div>
-    
     <div id="user-profile" class="user-pill" onclick="toggleUserMenu(event)">
       <div class="user-info-text">
-        <span id="user-rank" class="rank-tag">🏠 일반 시민</span>
+        <span id="user-rank" class="rank-tag">불러오는 중...</span>
         <span id="user-display-name" class="user-name">시민</span>
         <div class="exp-container"><div id="exp-bar" class="exp-fill"></div></div>
       </div>
       <img id="user-img" src="" class="user-avatar">
     </div>
-
     <div id="dropdown-menu" class="dropdown-menu">
       <div class="dropdown-item" onclick="alert('Lv.10 달성 시 승급 신청이 가능합니다!')">🎖️ 계급 승급 신청</div>
-      <div class="dropdown-item" onclick="location.href='/Datinoon/profile.html'">📂 마이 영토 보관함</div>
       <div class="dropdown-item" onclick="handleLogout()" style="color:red;">🚪 로그아웃</div>
     </div>
   </div>
@@ -105,17 +65,13 @@
 
 <main id="community-view" class="grid-container">
   <div class="card" onclick="gainExp(10)">
-    <div class="card-img-box"><img src="images/icon_sample.png" onerror="this.src='https://via.placeholder.com/200'"></div>
-    <div class="info"><b>대구 동성로 점령</b><br><small>2026.01.21</small></div>
+    <div style="padding:20px; border:var(--main-border); text-align:center; cursor:pointer;">
+      <b>📸 사진 올리고 점령하기</b><br><small>(클릭 시 경험치 +10)</small>
+    </div>
   </div>
 </main>
 
 <section id="war-map-view">
-  <div style="display:flex; justify-content: space-around; margin-bottom:20px; font-weight:900;">
-    <div style="color:var(--war-blue);">🔵 다티눈 연맹: 45%</div>
-    <div style="color:var(--war-red);">🔴 반란군: 12%</div>
-    <div>⚪ 미개척지: 43%</div>
-  </div>
   <div class="map-canvas">
     <h2 style="font-weight:900;">KOREA WAR MAP</h2>
     <p>현재 위치: <b>대구광역시</b></p>
@@ -124,30 +80,56 @@
 </section>
 
 <aside class="sidebar" id="sidebar">
-  <h2 style="font-weight:900;">국가 메뉴</h2>
-  <hr>
+  <h2 style="font-weight:900;">국가 메뉴</h2><hr>
   <p style="cursor:pointer; font-weight:900;" onclick="goHome()">🏠 홈 그리드</p>
   <p style="cursor:pointer; font-weight:900;" onclick="toggleWarMode()">⚔️ 영토 전쟁 상황</p>
-  <p style="cursor:pointer; font-weight:900;" onclick="alert('관리자(대통령) 전용 메뉴입니다.')">👑 국정 운영 (대통령 전용)</p>
 </aside>
 <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
 <script>
   const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
+  const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ'; // 유출주의! 실제 배포시 환경변수 권장
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // 가상 유저 데이터
-  let currentExp = 30;
-  let currentRank = "🏠 일반 시민";
+  // 1. 진짜 경험치 획득 함수 (DB 업데이트)
+  async function gainExp(amount) {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return alert("로그인이 필요합니다!");
 
-  function gainExp(amount) {
-    currentExp += amount;
-    if (currentExp >= 100) {
-      currentExp = 0;
-      alert("Level Up! 대통령님께 승급 승인을 요청할 수 있습니다.");
+    // 현재 DB 데이터 가져오기
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('"EXP"')
+      .eq('id', user.id)
+      .single();
+
+    const newExp = (profile.EXP || 0) + amount;
+
+    // DB 업데이트
+    const { error } = await supabaseClient
+      .from('profiles')
+      .update({ "EXP": newExp })
+      .eq('id', user.id);
+
+    if (!error) {
+      document.getElementById('exp-bar').style.width = (newExp % 100) + "%";
+      console.log(`경험치 획득! 현재: ${newExp}`);
     }
-    document.getElementById('exp-bar').style.width = currentExp + "%";
+  }
+
+  // 2. 유저 정보 실시간 반영
+  async function loadUserProfile(user) {
+    const { data: profile, error } = await supabaseClient
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (profile) {
+      document.getElementById('user-rank').textContent = `🏠 ${profile.Rank}`;
+      document.getElementById('user-display-name').textContent = profile.full_name;
+      document.getElementById('exp-bar').style.width = (profile.EXP % 100) + "%";
+    }
   }
 
   function toggleWarMode() {
@@ -185,15 +167,18 @@
     location.reload();
   }
 
-  supabaseClient.auth.onAuthStateChange((event, session) => {
+  // 로그인 상태 감지 및 DB 데이터 연동
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
     const btn = document.getElementById('login-btn');
-    const profile = document.getElementById('user-profile');
+    const profileSection = document.getElementById('user-profile');
+    
     if (session) {
       btn.style.display = 'none';
-      profile.style.display = 'flex';
-      document.getElementById('user-display-name').textContent = session.user.user_metadata.full_name;
+      profileSection.style.display = 'flex';
       document.getElementById('user-img').src = session.user.user_metadata.avatar_url;
-      document.getElementById('user-rank').textContent = currentRank;
+      
+      // DB에서 진짜 정보 가져오기
+      await loadUserProfile(session.user);
     }
   });
 
