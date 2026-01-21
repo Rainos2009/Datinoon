@@ -125,13 +125,13 @@
   
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // 2. 구글 로그인 실행 (리디렉션 주소 수정 완료)
+  // 2. 구글 로그인 실행 (주소를 확실하게 고정했습니다)
   async function handleGoogleLogin() {
-    console.log("버튼 클릭됨: 구글 로그인 시도 중...");
+    console.log("구글 로그인 시도...");
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        // 이 주소를 실제 깃허브 페이지 주소로 고정했습니다.
+        // 이 주소가 중요합니다!
         redirectTo: 'https://rainos2009.github.io/Datinoon/'
       }
     });
@@ -145,7 +145,7 @@
     location.reload();
   }
 
-  // 4. UI 제어 함수들
+  // 4. UI 제어
   function toggleLoginBox() {
     const box = document.getElementById("login-box");
     box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
@@ -161,7 +161,7 @@
   function openNicknameModal() { document.getElementById('nicknameModal').style.display = 'block'; }
   function closeNicknameModal() { document.getElementById('nicknameModal').style.display = 'none'; }
 
-  // 5. 로그인 상태 확인 및 프로필 표시
+  // 5. 로그인 상태 감지 및 UI 업데이트
   document.addEventListener("DOMContentLoaded", () => {
     supabaseClient.auth.onAuthStateChange((event, session) => {
       const loginBtn = document.getElementById('login-nav-btn');
@@ -175,7 +175,6 @@
         if (profileArea) profileArea.style.display = "flex";
         if (pName) pName.textContent = user.user_metadata.full_name || user.email;
         if (pImg && user.user_metadata.avatar_url) pImg.src = user.user_metadata.avatar_url;
-        console.log("로그인 성공 상태");
       } else {
         if (loginBtn) loginBtn.style.display = "block";
         if (profileArea) profileArea.style.display = "none";
@@ -183,7 +182,7 @@
     });
   });
 
-  // 6. 닉네임 저장 기능
+  // 6. 닉네임 저장
   async function saveNickname() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     const newName = document.getElementById('nicknameInput').value;
