@@ -2,160 +2,141 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon v0.3.2 - 200th Milestone</title>
+  <title>Datinoon v0.3.2 - 초기 계획 복구형</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* 전체 레이아웃 및 굵은 선 스타일 */
-    :root { --main-border: 3px solid #000; }
-    body { margin: 0; background: #fdfdfd; font-family: 'Pretendard', sans-serif; overflow-x: hidden; }
-
+    /* 초기 계획 1안의 정갈한 스타일 */
+    body { margin: 0; background: #fff; font-family: 'Pretendard', sans-serif; color: #333; }
+    
     .header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 20px; background: #fff; border-bottom: var(--main-border);
-      position: sticky; top: 0; z-index: 1000; height: 70px;
+      padding: 15px 40px; border-bottom: 1.5px solid #ddd; background: #fff;
     }
 
-    /* 로고 박스 */
-    .logo-box { border: var(--main-border); background: #fff; padding: 2px 8px; display: flex; align-items: center; cursor: pointer; }
-    .logo-img { height: 45px; }
+    .logo-container img { height: 50px; cursor: pointer; }
 
-    /* 검색창 */
+    /* 중앙 검색창: 계획안의 깔끔한 스타일 */
+    .search-container { flex: 1; display: flex; justify-content: center; }
     #searchInput {
-      width: 450px; padding: 12px; border: var(--main-border);
-      font-weight: bold; outline: none; font-size: 16px;
+      width: 400px; padding: 10px 15px; border: 1.5px solid #333;
+      font-size: 15px; outline: none;
     }
 
-    /* 버튼 공통 스타일 */
-    .btn-heavy {
-      border: var(--main-border); background: #fff; padding: 8px 20px;
-      font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 #000; transition: 0.1s;
-    }
-    .btn-heavy:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
+    .nav-right { display: flex; align-items: center; gap: 20px; }
+    .login-text { font-size: 18px; font-weight: bold; cursor: pointer; color: #000; }
 
-    /* 사이드바 & 오버레이 */
-    .sidebar {
-      position: fixed; left: -300px; top: 0; width: 280px; height: 100%;
-      background: #fff; border-right: var(--main-border); transition: 0.3s; z-index: 2000; padding: 20px;
-    }
-    .sidebar.active { left: 0; }
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
-    .overlay.active { display: block; }
-
-    /* 유저 메뉴 팝업 (위치 보정) */
-    .popup-menu {
-      display: none; position: absolute; top: 60px; right: 0;
-      width: 200px; background: #fff; border: var(--main-border);
-      box-shadow: 5px 5px 0 #000; z-index: 1001;
+    /* 초기 계획안 하단 그리드 (image_119ec2) */
+    .content-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 20px; padding: 40px; border-top: 1.5px solid #ddd;
     }
 
-    /* 메인 카드 */
-    .intro-card {
-      margin: 40px auto; width: 80%; border: var(--main-border);
-      padding: 30px; background: #fff; box-shadow: 8px 8px 0 rgba(0,0,0,0.05);
+    .item-card {
+      border: 1.5px solid #000; padding: 15px; background: #fff;
+      display: flex; flex-direction: column; align-items: flex-start;
     }
+    .item-thumb {
+      width: 100%; aspect-ratio: 1; border: 1.5px solid #000;
+      margin-bottom: 10px; display: flex; align-items: center; justify-content: center;
+    }
+    .item-info b { font-size: 16px; display: block; margin-bottom: 5px; }
+    .item-info span { font-size: 12px; color: #666; }
+
+    /* 푸터 */
+    .footer {
+      text-align: center; padding: 20px; border-top: 1.5px solid #ddd;
+      font-size: 14px; color: #666;
+    }
+
+    /* 유저 프로필 스타일 */
+    .user-pill { display: none; align-items: center; cursor: pointer; }
+    .user-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #000; margin-right: 10px; }
   </style>
 </head>
 <body>
 
 <header class="header">
-  <button class="btn-heavy" onclick="toggleSidebar()" style="font-size:20px; padding:5px 12px;">≡</button>
-  
-  <div class="logo-box" onclick="location.reload()">
-    <img src="images/Rainos.png" class="logo-img" alt="Logo" onerror="this.src='https://via.placeholder.com/150x50?text=Datinoon+0.3.2'">
+  <div class="logo-container">
+    <img src="images/Rainos.png" alt="Datinoon Logo" onerror="this.src='https://via.placeholder.com/120x40?text=Datinoon'">
   </div>
-
-  <div class="center">
+  
+  <div class="search-container">
     <input type="text" id="searchInput" placeholder="사진, 영상 혹은 레인 검색...">
   </div>
 
-  <div class="right" style="position: relative;">
-    <button id="login-nav-btn" class="btn-heavy" onclick="handleGoogleLogin()">로그인</button>
-    
-    <div id="profile-area" style="display:none; align-items:center; cursor:pointer;" onclick="toggleMenu()">
-      <img src="" id="profile-img" style="width:35px; height:35px; border:2px solid #000; margin-right:10px; border-radius:50%; object-fit:cover;">
-      <span id="profile-name" style="font-weight:900;">사용자</span>
-    </div>
-
-    <div id="popup-menu" class="popup-menu">
-      <div style="padding: 15px; font-weight: 900; border-bottom: 1px solid #eee; cursor: pointer;" onclick="location.href='/Datinoon/profile.html'">마이 프로필</div>
-      <div style="padding: 15px; font-weight: 900; color: red; cursor: pointer;" onclick="handleLogout()">로그아웃</div>
+  <div class="nav-right">
+    <span id="login-btn" class="login-text" onclick="handleGoogleLogin()">로그인</span>
+    <div id="user-profile" class="user-pill" onclick="toggleMenu()">
+      <img id="user-img" src="" class="user-avatar">
+      <b id="user-name">시민</b>
     </div>
   </div>
 </header>
 
-<aside class="sidebar" id="sidebar">
-  <h2 style="font-weight: 900;">Datinoon Menu</h2>
-  <hr border="1">
-  <ul style="list-style:none; padding:0; line-height:3;">
-    <li><a href="#" style="text-decoration:none; color:#000; font-weight:900;">📁 채널 탐색</a></li>
-    <li><a href="#" style="text-decoration:none; color:#000; font-weight:900;">🎞️ 영상 보관함</a></li>
-  </ul>
-</aside>
-<div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
-
 <main>
-  <div class="intro-card">
-    <h1 style="margin:0 0 10px 0;">Datinoon이란?</h1>
-    <p style="font-weight:600; color:#444;">누구나 사진과 영상을 공유하고 추억을 만드는 자유로운 커뮤니티입니다.</p>
+  <div style="padding: 60px 40px;">
+    <h2 style="font-size: 28px; font-weight: 800; margin-bottom: 10px;">Datinoon이란?</h2>
+    <p style="font-size: 16px; color: #555;">누구나 사진과 영상을 공유하고 추억을 만드는 자유로운 커뮤니티입니다.</p>
+  </div>
+
+  <div class="content-grid">
+    <div class="item-card">
+      <div class="item-thumb"><img src="images/icon_sample.png" style="width:40px;"></div>
+      <div class="item-info">
+        <b>비다!</b>
+        <span>2025년 7월 8일</span><br>
+        <span>시험 게시판</span>
+      </div>
+    </div>
+    <script>
+      for(let i=0; i<9; i++) {
+        document.write(`
+          <div class="item-card">
+            <div class="item-thumb"><img src="images/icon_sample.png" style="width:40px; opacity:0.3;"></div>
+            <div class="item-info">
+              <b>내용</b>
+              <span>2025년 7월 8일</span><br>
+              <span>00 게시판</span>
+            </div>
+          </div>
+        `);
+      }
+    </script>
   </div>
 </main>
 
+<footer class="footer">
+  © 2025 Datinoon | About | 문의
+</footer>
+
 <script>
-  // 1. Supabase 초기화 (기존 키 사용)
   const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // 2. 구글 로그인 실행
+  // 진짜 구글 로그인 함수
   async function handleGoogleLogin() {
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin + '/Datinoon/' }
     });
-    if (error) console.error("Error:", error.message);
+    if (error) alert("로그인 실패: " + error.message);
   }
 
-  // 3. 로그아웃 처리
-  async function handleLogout() {
-    await supabaseClient.auth.signOut();
-    location.reload();
-  }
-
-  // 4. 로그인 상태 감지 및 UI 업데이트
+  // 로그인 상태 변화 감지
   supabaseClient.auth.onAuthStateChange((event, session) => {
-    const loginBtn = document.getElementById('login-nav-btn');
-    const profileArea = document.getElementById('profile-area');
-    const profileImg = document.getElementById('profile-img');
-    const profileName = document.getElementById('profile-name');
-
+    const btn = document.getElementById('login-btn');
+    const profile = document.getElementById('user-profile');
     if (session) {
-      loginBtn.style.display = 'none';
-      profileArea.style.display = 'flex';
-      profileName.textContent = session.user.user_metadata.full_name || "시민";
-      profileImg.src = session.user.user_metadata.avatar_url || "images/Datinoon_Pro.png";
+      btn.style.display = 'none';
+      profile.style.display = 'flex';
+      document.getElementById('user-name').textContent = session.user.user_metadata.full_name;
+      document.getElementById('user-img').src = session.user.user_metadata.avatar_url;
     } else {
-      loginBtn.style.display = 'block';
-      profileArea.style.display = 'none';
+      btn.style.display = 'block';
+      profile.style.display = 'none';
     }
   });
-
-  // UI 토글 함수들
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('active');
-    document.getElementById('overlay').classList.toggle('active');
-  }
-
-  function toggleMenu() {
-    const menu = document.getElementById('popup-menu');
-    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
-  }
-
-  window.onclick = function(event) {
-    if (!event.target.closest('.right')) {
-      document.getElementById('popup-menu').style.display = 'none';
-    }
-  }
 </script>
-
 </body>
 </html>
