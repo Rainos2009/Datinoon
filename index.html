@@ -1,37 +1,44 @@
+아이고, 관리자님! 제가 드린 테스트용 코드 때문에 구글 로그인이 날아가서 당황하셨죠? 200번 커밋의 주인공인 **'구글 로그인 연동'**과 **'UI 기능'**을 모두 합친 진짜 최종 전체 코드를 드립니다.
+
+이 코드는 단순한 알림창이 아니라, 실제 Supabase 구글 소셜 로그인이 작동하며 프로필 이미지까지 자동으로 불러오도록 짰습니다.
+
+📄 Datinoon v0.3.2 최종 통합 코드
+HTML
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
   <title>Datinoon v0.3.2 - 200th Milestone</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* 전체 레이아웃 및 굵은 선 스타일 복구 */
+    /* 전체 레이아웃 및 굵은 선 스타일 */
     :root { --main-border: 3px solid #000; }
-    body { margin: 0; background: #fdfdfd; font-family: 'Pretendard', sans-serif; }
+    body { margin: 0; background: #fdfdfd; font-family: 'Pretendard', sans-serif; overflow-x: hidden; }
 
     .header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 20px; background: #fff; border-bottom: var(--main-border);
-      position: sticky; top: 0; z-index: 1000;
+      position: sticky; top: 0; z-index: 1000; height: 70px;
     }
 
-    /* 로고 박스 복구 */
+    /* 로고 박스 */
     .logo-box { border: var(--main-border); background: #fff; padding: 2px 8px; display: flex; align-items: center; cursor: pointer; }
     .logo-img { height: 45px; }
 
-    /* 검색창 스타일 */
+    /* 검색창 */
     #searchInput {
       width: 450px; padding: 12px; border: var(--main-border);
       font-weight: bold; outline: none; font-size: 16px;
     }
 
-    /* 버튼 스타일 */
+    /* 버튼 공통 스타일 */
     .btn-heavy {
       border: var(--main-border); background: #fff; padding: 8px 20px;
-      font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 #000;
+      font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 #000; transition: 0.1s;
     }
     .btn-heavy:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
 
-    /* 사이드바 및 팝업 */
+    /* 사이드바 & 오버레이 */
     .sidebar {
       position: fixed; left: -300px; top: 0; width: 280px; height: 100%;
       background: #fff; border-right: var(--main-border); transition: 0.3s; z-index: 2000; padding: 20px;
@@ -40,13 +47,14 @@
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
     .overlay.active { display: block; }
 
+    /* 유저 메뉴 팝업 (위치 보정) */
     .popup-menu {
-      display: none; position: absolute; top: 65px; right: 20px;
+      display: none; position: absolute; top: 60px; right: 0;
       width: 200px; background: #fff; border: var(--main-border);
       box-shadow: 5px 5px 0 #000; z-index: 1001;
     }
 
-    /* 메인 소개 카드 */
+    /* 메인 카드 */
     .intro-card {
       margin: 40px auto; width: 80%; border: var(--main-border);
       padding: 30px; background: #fff; box-shadow: 8px 8px 0 rgba(0,0,0,0.05);
@@ -67,10 +75,10 @@
   </div>
 
   <div class="right" style="position: relative;">
-    <button id="login-nav-btn" class="btn-heavy" onclick="handleLoginClick()">로그인</button>
+    <button id="login-nav-btn" class="btn-heavy" onclick="handleGoogleLogin()">로그인</button>
     
     <div id="profile-area" style="display:none; align-items:center; cursor:pointer;" onclick="toggleMenu()">
-      <img src="images/Datinoon_Pro.png" id="profile-img" style="width:35px; border:2px solid #000; margin-right:10px;">
+      <img src="" id="profile-img" style="width:35px; height:35px; border:2px solid #000; margin-right:10px; border-radius:50%; object-fit:cover;">
       <span id="profile-name" style="font-weight:900;">사용자</span>
     </div>
 
@@ -99,27 +107,55 @@
 </main>
 
 <script>
-  // 1. 사이드바 토글 기능 복구
+  // 1. Supabase 초기화 (기존 키 사용)
+  const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // 2. 구글 로그인 실행
+  async function handleGoogleLogin() {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/Datinoon/' }
+    });
+    if (error) console.error("Error:", error.message);
+  }
+
+  // 3. 로그아웃 처리
+  async function handleLogout() {
+    await supabaseClient.auth.signOut();
+    location.reload();
+  }
+
+  // 4. 로그인 상태 감지 및 UI 업데이트
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    const loginBtn = document.getElementById('login-nav-btn');
+    const profileArea = document.getElementById('profile-area');
+    const profileImg = document.getElementById('profile-img');
+    const profileName = document.getElementById('profile-name');
+
+    if (session) {
+      loginBtn.style.display = 'none';
+      profileArea.style.display = 'flex';
+      profileName.textContent = session.user.user_metadata.full_name || "시민";
+      profileImg.src = session.user.user_metadata.avatar_url || "images/Datinoon_Pro.png";
+    } else {
+      loginBtn.style.display = 'block';
+      profileArea.style.display = 'none';
+    }
+  });
+
+  // UI 토글 함수들
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('active');
     document.getElementById('overlay').classList.toggle('active');
   }
 
-  // 2. 유저 메뉴 토글 기능 복구
   function toggleMenu() {
     const menu = document.getElementById('popup-menu');
     menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
   }
 
-  // 3. 임시 로그인 처리 (테스트용)
-  function handleLoginClick() {
-    // 실제 Supabase 연동 전까지 UI 변화 테스트
-    document.getElementById('login-nav-btn').style.display = 'none';
-    document.getElementById('profile-area').style.display = 'flex';
-    alert("로그인 되었습니다! (200번 커밋 기념)");
-  }
-
-  // 화면 클릭 시 팝업 닫기
   window.onclick = function(event) {
     if (!event.target.closest('.right')) {
       document.getElementById('popup-menu').style.display = 'none';
