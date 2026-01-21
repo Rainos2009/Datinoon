@@ -2,24 +2,23 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon v0.3.2 - 203rd Milestone</title>
+  <title>Datinoon v0.3.2 - Empire System</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root { --main-border: 1.5px solid #000; --war-red: #ff4d4d; --war-blue: #4d94ff; }
+    :root { --main-border: 1.5px solid #000; --war-red: #ff4d4d; --war-blue: #4d94ff; --exp-green: #2ecc71; }
     body { margin: 0; background: #fff; font-family: 'Pretendard', sans-serif; overflow-x: hidden; }
 
-    /* 헤더 스타일 */
+    /* 헤더 */
     .header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 30px; border-bottom: var(--main-border); background: #fff;
       position: sticky; top: 0; z-index: 1000; height: 70px;
     }
-
     .left-zone { display: flex; align-items: center; gap: 15px; }
     .logo-img { height: 45px; cursor: pointer; }
     .menu-btn { font-size: 24px; cursor: pointer; background: none; border: none; font-weight: bold; }
 
-    /* 전쟁 모드 전환 버튼 */
+    /* 모드 전환 버튼 */
     .war-mode-btn {
       background: #000; color: #fff; border: none; padding: 8px 15px;
       font-weight: 900; cursor: pointer; font-size: 13px; transition: 0.2s;
@@ -27,51 +26,45 @@
     .war-mode-btn:hover { background: var(--war-red); }
 
     .search-box { flex: 1; display: flex; justify-content: center; }
-    #searchInput { width: 400px; padding: 10px; border: var(--main-border); outline: none; }
+    #searchInput { width: 350px; padding: 10px; border: var(--main-border); outline: none; }
 
-    /* 유저 및 로그인 영역 */
+    /* 유저 프로필 & 경험치 바 영역 */
     .user-zone { position: relative; }
     .login-text { font-weight: 900; cursor: pointer; border: var(--main-border); padding: 5px 15px; }
+    
     .user-pill { 
       display: none; align-items: center; cursor: pointer; 
-      border: var(--main-border); padding: 4px 10px; background: #fff;
+      border: var(--main-border); padding: 5px 12px; background: #fff;
     }
-    .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #000; margin-right: 8px; }
+    .user-info-text { display: flex; flex-direction: column; align-items: flex-end; margin-right: 10px; }
+    .rank-tag { font-size: 11px; font-weight: 900; color: var(--war-blue); margin-bottom: 2px; }
+    .user-name { font-size: 14px; font-weight: 900; }
+    
+    .exp-container { width: 80px; height: 5px; background: #eee; border: 1px solid #000; margin-top: 4px; overflow: hidden; }
+    .exp-fill { width: 40%; height: 100%; background: var(--exp-green); transition: 0.5s; }
+    
+    .user-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #000; }
 
+    /* 드롭다운 */
     .dropdown-menu {
-      display: none; position: absolute; top: 50px; right: 0;
-      width: 180px; background: #fff; border: var(--main-border);
+      display: none; position: absolute; top: 60px; right: 0;
+      width: 200px; background: #fff; border: var(--main-border);
       box-shadow: 4px 4px 0 #000; z-index: 1001;
     }
-    .dropdown-item { padding: 12px 15px; font-weight: 900; font-size: 14px; cursor: pointer; border-bottom: 1px solid #eee; }
-    .dropdown-item:last-child { border-bottom: none; color: red; }
+    .dropdown-item { padding: 12px 15px; font-weight: 900; font-size: 13px; cursor: pointer; border-bottom: 1px solid #eee; }
     .dropdown-item:hover { background: #f9f9f9; }
 
-    /* 1번 화면: 커뮤니티 그리드 */
-    .grid-container {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 25px; padding: 40px;
-    }
-    .card { border: var(--main-border); padding: 15px; transition: 0.2s; }
-    .card:hover { transform: translateY(-5px); box-shadow: 5px 5px 0 #000; }
-    .card-img-box { width: 100%; aspect-ratio: 1; border: var(--main-border); margin-bottom: 12px; overflow: hidden; }
-    .card-img-box img { width: 100%; height: 100%; object-fit: cover; }
-
-    /* 2번 화면: 영토 전쟁 지도 */
+    /* 화면 섹션 */
+    .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; padding: 40px; }
     #war-map-view { display: none; padding: 40px; text-align: center; }
     .map-canvas {
-      width: 100%; max-width: 900px; height: 600px; margin: 0 auto;
-      border: 3px solid #000; background: #f0f0f0; position: relative;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 12px 12px 0 rgba(0,0,0,0.1);
+      width: 100%; max-width: 900px; height: 550px; margin: 0 auto;
+      border: 3px solid #000; background: #f0f0f0; display: flex; align-items: center; justify-content: center;
+      box-shadow: 10px 10px 0 #000; flex-direction: column;
     }
-    .status-bar { display: flex; justify-content: space-around; margin-bottom: 20px; font-weight: 900; }
 
     /* 사이드바 */
-    .sidebar {
-      position: fixed; left: -300px; top: 0; width: 280px; height: 100%;
-      background: #fff; border-right: var(--main-border); transition: 0.3s; z-index: 2000; padding: 25px;
-    }
+    .sidebar { position: fixed; left: -300px; top: 0; width: 280px; height: 100%; background: #fff; border-right: var(--main-border); transition: 0.3s; z-index: 2000; padding: 25px; }
     .sidebar.active { left: 0; }
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1500; }
     .overlay.active { display: block; }
@@ -87,50 +80,55 @@
   </div>
 
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="사진, 영상 검색...">
+    <input type="text" id="searchInput" placeholder="영토, 유저, 기록 검색...">
   </div>
 
   <div class="user-zone">
     <div id="login-btn" class="login-text" onclick="handleGoogleLogin()">로그인</div>
+    
     <div id="user-profile" class="user-pill" onclick="toggleUserMenu(event)">
+      <div class="user-info-text">
+        <span id="user-rank" class="rank-tag">🏠 일반 시민</span>
+        <span id="user-display-name" class="user-name">시민</span>
+        <div class="exp-container"><div id="exp-bar" class="exp-fill"></div></div>
+      </div>
       <img id="user-img" src="" class="user-avatar">
-      <b id="user-name" style="font-size:14px;">시민</b>
     </div>
+
     <div id="dropdown-menu" class="dropdown-menu">
-      <div class="dropdown-item" onclick="location.href='/Datinoon/profile.html'">마이 프로필</div>
-      <div class="dropdown-item" onclick="handleLogout()">로그아웃</div>
+      <div class="dropdown-item" onclick="alert('Lv.10 달성 시 승급 신청이 가능합니다!')">🎖️ 계급 승급 신청</div>
+      <div class="dropdown-item" onclick="location.href='/Datinoon/profile.html'">📂 마이 영토 보관함</div>
+      <div class="dropdown-item" onclick="handleLogout()" style="color:red;">🚪 로그아웃</div>
     </div>
   </div>
 </header>
 
 <main id="community-view" class="grid-container">
-  <div class="card">
+  <div class="card" onclick="gainExp(10)">
     <div class="card-img-box"><img src="images/icon_sample.png" onerror="this.src='https://via.placeholder.com/200'"></div>
-    <div class="info"><b>대구 동성로 기록</b><br><small>2026.01.21</small></div>
+    <div class="info"><b>대구 동성로 점령</b><br><small>2026.01.21</small></div>
   </div>
 </main>
 
 <section id="war-map-view">
-  <div class="status-bar">
-    <div style="color: var(--war-blue);">🔵 다티눈 연맹: 45% 점령</div>
-    <div style="color: var(--war-red);">🔴 반란군: 12% 점령</div>
-    <div>⚪ 중립 지역: 43%</div>
+  <div style="display:flex; justify-content: space-around; margin-bottom:20px; font-weight:900;">
+    <div style="color:var(--war-blue);">🔵 다티눈 연맹: 45%</div>
+    <div style="color:var(--war-red);">🔴 반란군: 12%</div>
+    <div>⚪ 미개척지: 43%</div>
   </div>
   <div class="map-canvas">
-    <div>
-      <h2 style="font-weight: 900; font-size: 30px;">대한민국 영토 전쟁 지도</h2>
-      <p>관리자님 위치: <b>대구광역시 (점령군: 다티눈 연맹)</b></p>
-      <button class="war-mode-btn" onclick="alert('현재 지역을 점령하시겠습니까?')">🚩 현재 위치 점령하기</button>
-    </div>
+    <h2 style="font-weight:900;">KOREA WAR MAP</h2>
+    <p>현재 위치: <b>대구광역시</b></p>
+    <button class="war-mode-btn" style="padding:15px 30px; font-size:18px;" onclick="gainExp(20)">🚩 이 지역에 기여하기 (+20 EXP)</button>
   </div>
 </section>
 
 <aside class="sidebar" id="sidebar">
-  <h2 style="font-weight:900;">Datinoon Menu</h2>
+  <h2 style="font-weight:900;">국가 메뉴</h2>
   <hr>
   <p style="cursor:pointer; font-weight:900;" onclick="goHome()">🏠 홈 그리드</p>
   <p style="cursor:pointer; font-weight:900;" onclick="toggleWarMode()">⚔️ 영토 전쟁 상황</p>
-  <p style="cursor:pointer; font-weight:900;">🎞️ 영상 보관함</p>
+  <p style="cursor:pointer; font-weight:900;" onclick="alert('관리자(대통령) 전용 메뉴입니다.')">👑 국정 운영 (대통령 전용)</p>
 </aside>
 <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
@@ -139,19 +137,26 @@
   const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // 화면 전환 로직 (때려박기 핵심)
-  function toggleWarMode() {
-    const commView = document.getElementById('community-view');
-    const mapView = document.getElementById('war-map-view');
-    const btn = document.getElementById('mode-toggle-btn');
+  // 가상 유저 데이터
+  let currentExp = 30;
+  let currentRank = "🏠 일반 시민";
 
-    if (mapView.style.display === 'none' || mapView.style.display === '') {
-      commView.style.display = 'none';
-      mapView.style.display = 'block';
-      btn.textContent = "🏠 커뮤니티 그리드로";
-    } else {
-      goHome();
+  function gainExp(amount) {
+    currentExp += amount;
+    if (currentExp >= 100) {
+      currentExp = 0;
+      alert("Level Up! 대통령님께 승급 승인을 요청할 수 있습니다.");
     }
+    document.getElementById('exp-bar').style.width = currentExp + "%";
+  }
+
+  function toggleWarMode() {
+    const isMap = document.getElementById('war-map-view').style.display === 'block';
+    if (!isMap) {
+      document.getElementById('community-view').style.display = 'none';
+      document.getElementById('war-map-view').style.display = 'block';
+      document.getElementById('mode-toggle-btn').textContent = "🏠 커뮤니티로";
+    } else { goHome(); }
   }
 
   function goHome() {
@@ -160,7 +165,6 @@
     document.getElementById('mode-toggle-btn').textContent = "🗺️ 영토 전쟁 지도로";
   }
 
-  // 기존 기능 유지
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('active');
     document.getElementById('overlay').classList.toggle('active');
@@ -173,10 +177,7 @@
   }
 
   async function handleGoogleLogin() {
-    await supabaseClient.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin + '/Datinoon/' }
-    });
+    await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/Datinoon/' } });
   }
 
   async function handleLogout() {
@@ -190,8 +191,9 @@
     if (session) {
       btn.style.display = 'none';
       profile.style.display = 'flex';
-      document.getElementById('user-name').textContent = "🛡️ 기사 " + session.user.user_metadata.full_name;
+      document.getElementById('user-display-name').textContent = session.user.user_metadata.full_name;
       document.getElementById('user-img').src = session.user.user_metadata.avatar_url;
+      document.getElementById('user-rank').textContent = currentRank;
     }
   });
 
