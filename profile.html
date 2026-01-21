@@ -17,7 +17,7 @@
 
     /* 탭 메뉴 */
     .tabs { margin: 0 50px; display: flex; border-bottom: 2px solid #000; }
-    .tab { padding: 10px 30px; border: 2px solid #000; border-bottom: none; font-weight: 900; margin-right: 10px; background: #fff; }
+    .tab { padding: 10px 30px; border: 2px solid #000; border-bottom: none; font-weight: 900; margin-right: 10px; background: #fff; cursor: pointer; }
     .tab.active { background: #000; color: #fff; }
 
     /* 설명 구역 */
@@ -25,7 +25,8 @@
     .bio-text { font-size: 18px; line-height: 1.6; font-weight: bold; }
     
     .btn { padding: 8px 20px; border: 2px solid #000; background: #eee; font-weight: bold; cursor: pointer; margin-top: 15px; }
-    .logout-btn { color: red; font-weight: 900; cursor: pointer; border: none; background: none; }
+    .logout-btn { color: red; font-weight: 900; cursor: pointer; border: none; background: none; font-size: 16px; }
+    .logout-btn:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -38,7 +39,7 @@
 <div class="profile-header">
   <img id="display-img" src="" class="user-avatar" onerror="this.src='https://via.placeholder.com/100'">
   <div class="user-info">
-    <h1 id="display-name">이름 로딩중...</h1>
+    <h1 id="display-name">불러오는 중...</h1>
     <div id="display-date" class="user-meta">가입일 확인 중</div>
     <div style="margin-top:10px;">
       <button class="btn">업로드</button>
@@ -65,28 +66,44 @@
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   async function loadProfile() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) { location.href='index.html'; return; }
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    
+    // 세션이 없으면 메인으로 튕겨냄
+    if (!session) { 
+      location.href = 'index.html'; 
+      return; 
+    }
 
     const user = session.user;
     const name = user.user_metadata.full_name;
 
-    // 1. 이름만 깔끔하게 표시 (오피셜 제거)
+    // 1. 이름 및 이미지 표시
     document.getElementById('display-name').textContent = name;
     document.getElementById('display-img').src = user.user_metadata.avatar_url;
-    document.getElementById('display-date').textContent = `[가입] ${new Date(user.created_at).toLocaleDateString()}`;
+    
+    // 2. 가입일 표시 (2026. 1. 21. 형식)
+    const createdDate = new Date(user.created_at);
+    document.getElementById('display-date').textContent = `[가입] ${createdDate.getFullYear()}. ${createdDate.getMonth() + 1}. ${createdDate.getDate()}.`;
 
-    // 2. 운영자일 경우의 설명만 살려두기
+    // 3. 운영자(실바) 특별 멘트
     if (name.includes("Silva") || name.includes("실바")) {
-      document.getElementById('display-bio').innerHTML = `안녕하십니까, Datinoon의 운영자 '${name}'입니다.<br>방문을 환영합니다.`;
+      document.getElementById('display-bio').innerHTML = `안녕하십니까, Datinoon의 운영자 '${name}'입니다.<br>전문적인 커뮤니티 공간에 오신 것을 환영합니다.`;
     } else {
       document.getElementById('display-bio').textContent = `안녕하십니까, ${name}입니다.`;
     }
   }
 
+  // ★ 확실한 로그아웃 로직 ★
   async function handleLogout() {
-    await supabaseClient.auth.signOut();
-    location.href = 'index.html';
+    if (confirm("정말 로그아웃 하시겠습니까?")) {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) {
+        alert("로그아웃 실패: " + error.message);
+      } else {
+        // 완전히 로그아웃된 후 메인으로 이동
+        window.location.replace('index.html'); 
+      }
+    }
   }
 
   loadProfile();
