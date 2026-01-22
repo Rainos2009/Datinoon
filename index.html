@@ -15,7 +15,7 @@
     .gallery-tab.active { background: #000; color: #fff; }
     .gallery-tab:hover { background: #f0f0f0; }
 
-    /* 글쓰기 입력창 스타일 */
+    /* 글쓰기 박스 */
     .write-box { display: none; margin: 20px 50px; padding: 20px; border: 3px solid #000; background: #fafafa; }
     .write-box input[type="text"] { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #000; box-sizing: border-box; font-size: 16px; }
     .write-box input[type="file"] { margin-bottom: 15px; display: block; }
@@ -23,6 +23,7 @@
     .btn-submit { background: #000; color: #fff; border: none; padding: 10px 25px; font-weight: 900; cursor: pointer; }
     .btn-cancel { background: #eee; color: #000; border: 2px solid #000; padding: 10px 20px; font-weight: bold; cursor: pointer; }
 
+    /* 게시판 카드 */
     .container { padding: 20px 50px; }
     .board-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
     .post-card { border: 2px solid #000; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fff; position: relative; }
@@ -77,9 +78,7 @@
   let currentUser = null;
   let activeGallery = '자유';
 
-  window.onload = () => {
-    loadPosts();
-  };
+  window.onload = () => { loadPosts(); };
 
   async function handleGoogleLogin() { 
     await supabaseClient.auth.signInWithOAuth({ 
@@ -91,16 +90,8 @@
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (session) {
       currentUser = session.user;
-      
-      // DB에서 닉네임 가져오기
-      const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('nickname')
-        .eq('id', currentUser.id)
-        .single();
-      
+      const { data: profile } = await supabaseClient.from('profiles').select('nickname').eq('id', currentUser.id).single();
       const displayName = profile?.nickname || currentUser.user_metadata.full_name;
-      
       document.getElementById('auth-area').innerHTML = `<span onclick="location.href='profile.html'" style="cursor:pointer; font-weight:bold;">🪪 ${displayName}</span>`;
       document.getElementById('write-trigger').style.display = 'block';
     } else {
@@ -121,7 +112,7 @@
   }
 
   function showWriteBox() {
-    if (activeGallery === '운영 공지' && currentUser.email !== ADMIN_EMAIL) {
+    if (activeGallery === '운영 공지' && currentUser?.email !== ADMIN_EMAIL) {
       alert("공지사항은 최고 관리자만 작성할 수 있습니다.");
       return;
     }
@@ -143,7 +134,7 @@
     if (!content) return alert("내용을 입력해주세요!");
 
     if (file) {
-      // ★ 파일명 에러 해결: 안전한 이름으로 재생성
+      // ★ 핵심 해결책: 특수문자/공백 없는 안전한 파일명 생성
       const fileExt = file.name.split('.').pop();
       const safeFileName = `${Date.now()}_${Math.floor(Math.random() * 1000)}.${fileExt}`;
 
@@ -152,7 +143,7 @@
         .upload(safeFileName, file);
 
       if (error) {
-        alert("이미지 업로드에 실패했습니다. Storage 설정을 확인해주세요.");
+        alert("이미지 업로드 실패! Storage 정책을 확인하세요.");
         console.error(error);
         return;
       }
@@ -161,7 +152,6 @@
       imageUrl = urlData.publicUrl;
     }
 
-    // 현재 유저의 닉네임 확인
     let authorName = "익명";
     if (currentUser) {
       const { data: prof } = await supabaseClient.from('profiles').select('nickname').eq('id', currentUser.id).single();
@@ -169,35 +159,23 @@
     }
 
     const { error: dbError } = await supabaseClient.from('anonymous_posts').insert([
-      { 
-        content: content, 
-        author: authorName, 
-        gallery_name: activeGallery,
-        image_url: imageUrl 
-      }
+      { content, author: authorName, gallery_name: activeGallery, image_url: imageUrl }
     ]);
 
-    if (dbError) {
-      alert("글 저장 실패: " + dbError.message);
-    } else {
-      closeWriteBox();
-      loadPosts();
-    }
+    if (dbError) alert("저장 실패: " + dbError.message);
+    else { closeWriteBox(); loadPosts(); }
   }
 
   async function deletePost(postId) {
-    if (confirm("정말로 이 글을 삭제하시겠습니까?")) {
+    if (confirm("정말로 삭제하시겠습니까?")) {
       await supabaseClient.from('anonymous_posts').delete().eq('id', postId);
       loadPosts();
     }
   }
 
   async function loadPosts() {
-    const { data: posts } = await supabaseClient
-      .from('anonymous_posts')
-      .select('*')
-      .eq('gallery_name', activeGallery)
-      .order('created_at', { ascending: false });
+    const { data: posts } = await supabaseClient.from('anonymous_posts')
+      .select('*').eq('gallery_name', activeGallery).order('created_at', { ascending: false });
 
     const grid = document.getElementById('board-grid');
     if (posts && posts.length > 0) {
