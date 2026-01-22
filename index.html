@@ -92,7 +92,6 @@
     if (session) {
       currentUser = session.user;
       
-      // DB에서 닉네임 가져오기
       const { data: profile } = await supabaseClient
         .from('profiles')
         .select('nickname')
@@ -143,17 +142,18 @@
     if (!content) return alert("내용을 입력해주세요!");
 
     if (file) {
-      // ★ 파일명 에러 해결: 안전한 이름으로 재생성
+      // ★ 400 에러 원천 봉쇄: 한글, 괄호, 공백이 없는 안전한 파일명으로 재생성
       const fileExt = file.name.split('.').pop();
-      const safeFileName = `${Date.now()}_${Math.floor(Math.random() * 1000)}.${fileExt}`;
+      const safeFileName = `img_${Date.now()}_${Math.floor(Math.random() * 1000)}.${fileExt}`;
 
       const { data, error } = await supabaseClient.storage
         .from('photos')
         .upload(safeFileName, file);
 
       if (error) {
-        alert("이미지 업로드에 실패했습니다. Storage 설정을 확인해주세요.");
-        console.error(error);
+        // 상세 에러 내용을 콘솔에 찍어 원인을 더 정확히 파악하게 함
+        console.error("Storage Error Details:", error);
+        alert(`이미지 업로드 실패: ${error.message}\nSupabase Storage의 Policy(정책) 설정을 확인하세요.`);
         return;
       }
 
@@ -161,7 +161,6 @@
       imageUrl = urlData.publicUrl;
     }
 
-    // 현재 유저의 닉네임 확인
     let authorName = "익명";
     if (currentUser) {
       const { data: prof } = await supabaseClient.from('profiles').select('nickname').eq('id', currentUser.id).single();
