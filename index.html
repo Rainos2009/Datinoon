@@ -1,24 +1,28 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Datinoon - Gallery System</title>
+
+  <!-- Supabase JS v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     /* 기본 레이아웃 및 디자인 */
     body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; margin: 0; background: #fff; transition: 0.3s; }
-    .header { border-bottom: 2px solid #000; padding: 0 50px; display: flex; justify-content: space-between; align-items: center; height: 70px; background: #fff; }
+    .header { border-bottom: 2px solid #000; padding: 0 50px; display: flex; justify-content: space-between; align-items: center; height: 70px; background: #fff; gap: 16px; }
     .logo-img { height: 40px; cursor: pointer; border: 1px solid #000; }
-    .search-bar { border: 1px solid #000; padding: 8px 15px; width: 400px; }
-    
+    .search-bar { border: 1px solid #000; padding: 8px 15px; width: 400px; max-width: 45vw; }
+
     /* 로그인 영역 (우측 상단) */
-    #auth-area { display: flex; align-items: center; gap: 15px; min-width: 150px; justify-content: flex-end; }
+    #auth-area { display: flex; align-items: center; gap: 12px; min-width: 150px; justify-content: flex-end; }
     .login-btn { padding: 8px 20px; border: 2px solid #000; background: #000; color: #fff; font-weight: 900; cursor: pointer; }
     .logout-btn { padding: 4px 10px; border: 1px solid #000; background: #fff; cursor: pointer; font-size: 11px; }
 
-    /* 탭 메뉴 (3개 복구) */
-    .gallery-container { padding: 20px 50px 0 50px; display: flex; gap: 10px; }
-    .gallery-tab { padding: 8px 25px; border: 2px solid #000; background: #fff; font-weight: 900; cursor: pointer; color: #000; }
+    /* 탭 메뉴 */
+    .gallery-container { padding: 20px 50px 0 50px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .gallery-tab { padding: 8px 25px; border: 2px solid #000; background: #fff; font-weight: 900; cursor: pointer; color: #000; user-select: none; }
     .gallery-tab.active { background: #000; color: #fff; }
 
     /* 컨텐츠 영역 */
@@ -26,6 +30,12 @@
     .board-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
     .post-card { border: 2px solid #000; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fff; min-height: 180px; }
     .icon-box { width: 40px; height: 50px; border: 3px solid #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; }
+    .meta { font-size: 12px; color: #888; margin-top: auto; }
+    .title { font-weight: 800; font-size: 17px; margin-top: 5px; white-space: pre-wrap; word-break: break-word; }
+
+    /* 상태 메시지 */
+    .status { color: #888; padding: 20px; }
+    .status.error { color: #b00000; }
 
     /* 게임 탭 전용 지도 모드 */
     #world-map-container { display: none; width: 100%; margin-bottom: 30px; border: 2px solid #ff0000; background: #000; }
@@ -35,95 +45,258 @@
     body.game-mode #world-map-container { display: block; }
     body.game-mode .post-card { background: #1a1a1a; border-color: #ff0000; color: #fff; }
     body.game-mode .gallery-tab.active { background: #ff0000; border-color: #ff0000; }
-    
-    .write-btn { position: fixed; bottom: 30px; right: 30px; padding: 15px 35px; background: #000; color: #fff; font-weight: 900; border-radius: 50px; cursor: pointer; z-index: 1000; }
+
+    .write-btn { position: fixed; bottom: 30px; right: 30px; padding: 15px 35px; background: #000; color: #fff; font-weight: 900; border-radius: 50px; cursor: pointer; z-index: 1000; display: none; }
+
+    /* 반응형 */
+    @media (max-width: 900px) {
+      .header { padding: 0 18px; }
+      .gallery-container { padding: 18px 18px 0 18px; }
+      .container { padding: 18px; }
+      .search-bar { width: 100%; max-width: none; }
+    }
   </style>
 </head>
-<body>
 
+<body>
 <header class="header">
-  <img src="images/Datinoon_0.4.1.png" class="logo-img" onclick="location.reload()">
-  <input type="text" id="search-input" class="search-bar" placeholder="갤러리 내 검색..." onkeyup="if(event.keyCode==13) loadPosts(activeGallery, this.value)">
+  <img src="images/Datinoon_0.4.1.png" class="logo-img" onclick="location.reload()" alt="Datinoon" />
+  <input
+    type="text"
+    id="search-input"
+    class="search-bar"
+    placeholder="갤러리 내 검색..."
+  />
   <div id="auth-area"></div>
 </header>
 
 <div class="gallery-container">
-  <div class="gallery-tab active" onclick="switchGallery('자유', this)">자유 갤러리</div>
-  <div class="gallery-tab" onclick="switchGallery('게임', this)">게임 탭</div>
-  <div class="gallery-tab" onclick="switchGallery('공지', this)">운영 공지</div>
+  <div class="gallery-tab active" data-gallery="자유">자유 갤러리</div>
+  <div class="gallery-tab" data-gallery="게임">게임 탭</div>
+  <div class="gallery-tab" data-gallery="공지">운영 공지</div>
 </div>
 
 <div class="container">
   <h2 id="current-gallery-title" style="margin-bottom: 20px;">자유 갤러리</h2>
+
   <div id="world-map-container">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" class="world-map">
+    <img
+      src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg"
+      class="world-map"
+      alt="World map"
+    />
   </div>
+
   <div id="board-grid" class="board-grid"></div>
 </div>
 
-<button id="write-trigger" class="write-btn" style="display:none;">+ 글쓰기</button>
+<button id="write-trigger" class="write-btn">+ 글쓰기</button>
 
 <script>
+  /************************************************************
+   * 0) Supabase 설정
+   ************************************************************/
   const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
+
+  // supabase-js 로드 실패 방지
+  if (!window.supabase) {
+    alert("Supabase 라이브러리를 불러오지 못했습니다. 인터넷/스크립트 링크를 확인해 주세요.");
+  }
+
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let activeGallery = '자유';
+  let currentSearch = '';
   const REDIRECT_URL = window.location.origin + window.location.pathname;
 
-  // 인증 UI 렌더링
+  const authArea = document.getElementById('auth-area');
+  const writeBtn  = document.getElementById('write-trigger');
+  const grid      = document.getElementById('board-grid');
+  const titleEl   = document.getElementById('current-gallery-title');
+  const searchEl  = document.getElementById('search-input');
+
+  /************************************************************
+   * 1) 유틸: 화면에 안전하게 텍스트 넣기 (XSS 방지)
+   ************************************************************/
+  function el(tag, className) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    return node;
+  }
+
+  function setStatus(message, isError = false) {
+    grid.innerHTML = '';
+    const p = el('p', 'status' + (isError ? ' error' : ''));
+    p.textContent = message;
+    grid.appendChild(p);
+  }
+
+  /************************************************************
+   * 2) 인증 UI
+   ************************************************************/
   function renderAuth(session) {
-    const authArea = document.getElementById('auth-area');
-    const writeBtn = document.getElementById('write-trigger');
-    if (session) {
-      const name = session.user.user_metadata.full_name || "사용자";
-      authArea.innerHTML = `<span>🪪 ${name}</span><button class="logout-btn" onclick="supabaseClient.auth.signOut().then(()=>location.reload())">로그아웃</button>`;
+    authArea.innerHTML = '';
+
+    if (session && session.user) {
+      const name =
+        (session.user.user_metadata && (session.user.user_metadata.full_name || session.user.user_metadata.name)) ||
+        session.user.email ||
+        "사용자";
+
+      const span = el('span');
+      span.textContent = `🪪 ${name}`;
+
+      const logout = el('button', 'logout-btn');
+      logout.type = 'button';
+      logout.textContent = '로그아웃';
+      logout.onclick = async () => {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) alert("로그아웃 실패: " + error.message);
+        location.reload();
+      };
+
+      authArea.appendChild(span);
+      authArea.appendChild(logout);
       writeBtn.style.display = 'block';
     } else {
-      authArea.innerHTML = `<button class="login-btn" onclick="handleLogin()">로그인</button>`;
+      const login = el('button', 'login-btn');
+      login.type = 'button';
+      login.textContent = '로그인';
+      login.onclick = handleLogin;
+
+      authArea.appendChild(login);
       writeBtn.style.display = 'none';
     }
   }
 
   async function handleLogin() {
-    await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: REDIRECT_URL } });
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: REDIRECT_URL }
+    });
+    if (error) alert("로그인 실패: " + error.message);
   }
 
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    renderAuth(session);
-    loadPosts(activeGallery);
+  /************************************************************
+   * 3) 갤러리 탭 전환
+   ************************************************************/
+  function setGallery(galleryName) {
+    activeGallery = galleryName;
+
+    titleEl.textContent = galleryName + " 갤러리";
+    document.body.className = (galleryName === '게임' ? 'game-mode' : '');
+
+    document.querySelectorAll('.gallery-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.gallery === galleryName);
+    });
+
+    // 검색어 유지한 채로 로드
+    loadPosts(activeGallery, currentSearch);
+  }
+
+  document.querySelectorAll('.gallery-tab').forEach(tab => {
+    tab.addEventListener('click', () => setGallery(tab.dataset.gallery));
   });
 
-  // 탭 전환
-  function switchGallery(galleryName, element) {
-    activeGallery = galleryName;
-    document.getElementById('current-gallery-title').innerText = galleryName + " 갤러리";
-    document.body.className = (galleryName === '게임' ? 'game-mode' : '');
-    document.querySelectorAll('.gallery-tab').forEach(t => t.classList.remove('active'));
-    element.classList.add('active');
-    loadPosts(galleryName);
-  }
-
-  // 게시글 로드 (검색 기능 포함)
+  /************************************************************
+   * 4) 게시글 로드 (검색 포함) - 문자열 innerHTML 조립 안 함 (XSS 방지)
+   ************************************************************/
   async function loadPosts(gallery = '자유', searchTerm = '') {
-    let query = supabaseClient.from('anonymous_posts').select('*').eq('gallery_name', gallery).order('created_at', { ascending: false });
-    if(searchTerm) query = query.ilike('content', `%${searchTerm}%`);
-    
-    const { data: posts } = await query;
-    const grid = document.getElementById('board-grid');
-    grid.innerHTML = (posts && posts.length > 0) ? posts.map(p => `
-      <div class="post-card">
-        <div class="icon-box">0</div>
-        <div style="font-weight:bold; font-size:17px; margin-top:5px;">${p.content}</div>
-        <div style="font-size:12px; color:#888; margin-top:auto;">${p.author} | ${new Date(p.created_at).toLocaleDateString()}</div>
-      </div>
-    `).join('') : '<p style="color:#888; padding:20px;">게시글이 없습니다.</p>';
+    setStatus("불러오는 중...");
+
+    try {
+      let query = supabaseClient
+        .from('anonymous_posts')
+        .select('*')
+        .eq('gallery_name', gallery)
+        .order('created_at', { ascending: false });
+
+      if (searchTerm) query = query.ilike('content', `%${searchTerm}%`);
+
+      const { data: posts, error } = await query;
+      if (error) throw error;
+
+      grid.innerHTML = '';
+
+      if (!posts || posts.length === 0) {
+        setStatus("게시글이 없습니다.");
+        return;
+      }
+
+      posts.forEach((p, idx) => {
+        const card = el('div', 'post-card');
+
+        const icon = el('div', 'icon-box');
+        // 0 고정 말고, 그냥 번호 느낌으로 (원하면 다시 0으로 바꾸셔도 됩니다)
+        icon.textContent = String((idx + 1) % 10);
+
+        const content = el('div', 'title');
+        content.textContent = (p && p.content) ? String(p.content) : '';
+
+        const meta = el('div', 'meta');
+        const author = (p && p.author) ? String(p.author) : '익명';
+        const dateStr = p && p.created_at
+          ? new Date(p.created_at).toLocaleString('ko-KR')
+          : '';
+        meta.textContent = `${author} | ${dateStr}`;
+
+        card.appendChild(icon);
+        card.appendChild(content);
+        card.appendChild(meta);
+
+        grid.appendChild(card);
+      });
+    } catch (e) {
+      setStatus("불러오기 실패: " + (e && e.message ? e.message : String(e)), true);
+    }
   }
 
-  window.onload = () => {
-    supabaseClient.auth.getSession().then(({data}) => renderAuth(data.session));
-    loadPosts();
-  };
+  /************************************************************
+   * 5) 검색 (엔터 누르면 검색)
+   ************************************************************/
+  searchEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      currentSearch = (searchEl.value || '').trim();
+      loadPosts(activeGallery, currentSearch);
+    }
+  });
+
+  /************************************************************
+   * 6) 시작할 때: 세션 확인 + 게시글 로드
+   ************************************************************/
+  window.addEventListener('load', async () => {
+    // 1) 지금 로그인 상태 확인 → 버튼 표시
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) {
+      // 세션 확인이 실패해도 게시글은 보여줄 수 있으니, 버튼만 로그인으로 둠
+      renderAuth(null);
+    } else {
+      renderAuth(data.session);
+    }
+
+    // 2) 기본 게시글 로드
+    loadPosts(activeGallery, currentSearch);
+  });
+
+  /************************************************************
+   * 7) 로그인/로그아웃 상태 변화 반영
+   *    (필요 이상으로 재로드하지 않게 최소 처리)
+   ************************************************************/
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    renderAuth(session);
+    // 로그인/로그아웃 때만 목록 재로드
+    if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+      loadPosts(activeGallery, currentSearch);
+    }
+  });
+
+  /************************************************************
+   * 8) 글쓰기 버튼(일단 눌렀을 때 안내만)
+   ************************************************************/
+  writeBtn.addEventListener('click', () => {
+    alert("글쓰기 기능은 아직 연결되어 있지 않습니다. (원하시면 다음 단계로 만들어드릴 수 있습니다)");
+  });
 </script>
 </body>
 </html>
