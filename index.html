@@ -2,42 +2,37 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Datinoon - Gallery System</title>
+  <title>Datinoon - Project</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; margin: 0; background: #fff; overflow-x: hidden; transition: 0.3s; }
     .header { border-bottom: 2px solid #000; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; background: inherit; }
     .logo-img { height: 40px; cursor: pointer; border: 1px solid #000; }
-    .search-bar { border: 1px solid #000; padding: 5px 15px; width: 40%; max-width: 400px; }
-    
     .gallery-container { padding: 20px 50px 0 50px; display: flex; gap: 10px; }
-    .gallery-tab { padding: 8px 25px; border: 2px solid #000; background: #fff; font-weight: 900; cursor: pointer; transition: 0.2s; color: #000; text-decoration: none; }
+    .gallery-tab { padding: 8px 25px; border: 2px solid #000; background: #fff; font-weight: 900; cursor: pointer; transition: 0.2s; color: #000; }
     .gallery-tab.active { background: #000; color: #fff; }
 
-    .write-box { display: none; margin: 20px 50px; padding: 20px; border: 3px solid #000; background: #fafafa; color: #000; }
-    .write-box input[type="text"] { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #000; box-sizing: border-box; font-size: 16px; }
-    .write-box input[type="file"] { margin-bottom: 15px; display: block; }
+    /* 글쓰기 박스 */
+    .write-box { display: none; margin: 20px 50px; padding: 20px; border: 3px solid #000; background: #fafafa; }
+    .write-box input[type="text"] { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #000; box-sizing: border-box; }
+    .write-btns { display: flex; gap: 10px; }
     .btn-submit { background: #000; color: #fff; border: none; padding: 10px 25px; font-weight: 900; cursor: pointer; }
-    .btn-cancel { background: #eee; color: #000; border: 2px solid #000; padding: 10px 20px; font-weight: bold; cursor: pointer; }
 
     .container { padding: 20px 50px; }
     .board-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
     .post-card { border: 2px solid #000; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fff; position: relative; color: #000; }
-    .post-img { width: 100%; border: 1px solid #eee; margin-bottom: 5px; border-radius: 4px; object-fit: cover; max-height: 400px; }
+    .post-img { width: 100%; border: 1px solid #eee; border-radius: 4px; object-fit: cover; max-height: 400px; }
     .icon-box { width: 40px; height: 50px; border: 3px solid #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; }
-    .post-title { font-weight: bold; font-size: 16px; word-break: break-all; min-height: 30px; }
-    .post-footer { border-top: 1px solid #eee; padding-top: 10px; margin-top: auto; }
-    .post-date { color: #888; font-size: 11px; margin-top: 5px; }
+    
+    .write-btn { position: fixed; bottom: 30px; right: 30px; padding: 15px 35px; background: #000; color: #fff; font-weight: 900; cursor: pointer; border-radius: 50px; border: none; z-index: 1000; display: none; }
 
-    .delete-btn { background: red; color: white; border: none; font-size: 10px; padding: 2px 5px; cursor: pointer; font-weight: bold; margin-top: 5px; }
-    .write-btn { position: fixed; bottom: 30px; right: 30px; padding: 15px 35px; background: #000; color: #fff; font-weight: 900; cursor: pointer; border-radius: 50px; border: none; z-index: 1000; box-shadow: 5px 5px 0 #ccc; }
+    /* 게임 탭 전용 */
+    #world-map-container { display: none; width: 100%; margin-bottom: 30px; border: 2px solid #ff0000; background: #000; }
+    .world-map { width: 100%; height: auto; display: block; filter: invert(1) sepia(1) saturate(5) hue-rotate(-50deg); opacity: 0.8; }
 
-    /* --- 게임 탭 전용 스타일 --- */
-    body.game-mode { background: #1a1a1a; color: #fff; cursor: crosshair !important; }
-    body.game-mode .post-card { background: #222; border-color: #ff0000; color: #fff; box-shadow: 5px 5px 0 #440000; }
-    body.game-mode .header { border-bottom-color: #ff0000; }
-    body.game-mode .icon-box { border-color: #ff0000; color: #ff0000; }
-    body.game-mode .gallery-tab { background: #333; color: #fff; border-color: #444; }
+    body.game-mode { background: #0c0c0c; color: #ff0000; cursor: crosshair !important; }
+    body.game-mode #world-map-container { display: block; }
+    body.game-mode .post-card { background: #1a1a1a; border-color: #ff0000; color: #fff; }
     body.game-mode .gallery-tab.active { background: #ff0000; border-color: #ff0000; }
   </style>
 </head>
@@ -45,7 +40,6 @@
 
 <header class="header">
   <img src="images/Datinoon_0.4.1.png" class="logo-img" onclick="location.reload()">
-  <input type="text" class="search-bar" placeholder="갤러리 내 검색...">
   <div id="auth-area"></div>
 </header>
 
@@ -56,146 +50,101 @@
 </div>
 
 <div id="write-box" class="write-box">
-  <input type="text" id="post-content" placeholder="내용 입력...">
+  <input type="text" id="post-content" placeholder="내용을 입력하세요...">
   <input type="file" id="post-file" accept="image/*">
   <div class="write-btns">
     <button class="btn-submit" onclick="submitPost()">게시글 올리기</button>
-    <button class="btn-cancel" onclick="closeWriteBox()">취소</button>
+    <button onclick="document.getElementById('write-box').style.display='none'">취소</button>
   </div>
 </div>
 
 <div class="container">
-  <h2 id="current-gallery-title" style="margin-bottom: 20px;">자유 갤러리</h2>
+  <h2 id="current-gallery-title">자유 갤러리</h2>
+  <div id="world-map-container">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" class="world-map">
+  </div>
   <div id="board-grid" class="board-grid"></div>
 </div>
 
-<button id="write-trigger" class="write-btn" style="display:none;" onclick="showWriteBox()">+ 글쓰기</button>
+<button id="write-trigger" class="write-btn" onclick="document.getElementById('write-box').style.display='block'">+ 글쓰기</button>
 
 <script>
-  // 님의 원래 설정값 유지
   const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const ADMIN_EMAIL = 'sopkqlql@gmail.com'; 
   let currentUser = null;
   let activeGallery = '자유';
-
-  // [수정] 현재 접속한 주소를 그대로 사용하도록 리디렉션 경로 복구
   const REDIRECT_URL = window.location.href.split('#')[0].split('?')[0];
 
-  window.onload = () => { loadPosts(); };
-
   async function handleGoogleLogin() { 
-    const { error } = await supabaseClient.auth.signInWithOAuth({ 
-      provider: 'google',
-      options: { redirectTo: REDIRECT_URL }
-    }); 
-    if (error) alert("로그인 오류: " + error.message);
+    await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: REDIRECT_URL } });
   }
 
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     const authArea = document.getElementById('auth-area');
     const writeBtn = document.getElementById('write-trigger');
-
     if (session) {
       currentUser = session.user;
-      const { data: profile } = await supabaseClient.from('profiles').select('nickname').eq('id', currentUser.id).single();
-      const displayName = profile?.nickname || currentUser.user_metadata.full_name;
-      authArea.innerHTML = `<span onclick="location.href='profile.html'" style="cursor:pointer; font-weight:bold;">🪪 ${displayName}</span> <button onclick="handleLogout()" style="margin-left:10px; cursor:pointer;">로그아웃</button>`;
+      authArea.innerHTML = `<button onclick="supabaseClient.auth.signOut().then(()=>location.reload())">로그아웃</button>`;
       writeBtn.style.display = 'block';
     } else {
-      currentUser = null;
-      authArea.innerHTML = `<button style="font-weight:900; cursor:pointer;" onclick="handleGoogleLogin()">로그인</button>`;
+      authArea.innerHTML = `<button onclick="handleGoogleLogin()">로그인</button>`;
       writeBtn.style.display = 'none';
     }
     loadPosts();
   });
 
-  async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
-
   function switchGallery(galleryName, element) {
     activeGallery = galleryName;
     document.getElementById('current-gallery-title').textContent = galleryName + (galleryName === '게임' ? ' 전장' : ' 갤러리');
-    
-    // 게임 탭 테마 적용
-    if (galleryName === '게임') {
-      document.body.classList.add('game-mode');
-    } else {
-      document.body.classList.remove('game-mode');
-    }
-
+    document.body.className = (galleryName === '게임' ? 'game-mode' : '');
     document.querySelectorAll('.gallery-tab').forEach(t => t.classList.remove('active'));
     element.classList.add('active');
-    closeWriteBox();
     loadPosts();
-  }
-
-  function showWriteBox() {
-    if (activeGallery === '운영 공지' && currentUser?.email !== ADMIN_EMAIL) { alert("공지사항은 관리자만 작성 가능합니다."); return; }
-    document.getElementById('write-box').style.display = 'block';
-  }
-
-  function closeWriteBox() {
-    document.getElementById('write-box').style.display = 'none';
-    document.getElementById('post-content').value = '';
-    document.getElementById('post-file').value = '';
   }
 
   async function submitPost() {
     const content = document.getElementById('post-content').value;
     const file = document.getElementById('post-file').files[0];
     let imageUrl = null;
-    if (!content) return alert("내용을 입력해주세요!");
+    if (!content) return alert("내용을 입력하세요!");
 
     if (file) {
-      const { data, error } = await supabaseClient.storage.from('photos').upload(`img_${Date.now()}`, file);
-      if (!error) {
-        const { data: urlData } = supabaseClient.storage.from('photos').getPublicUrl(data.path);
-        imageUrl = urlData.publicUrl;
-      }
+      const fileName = `img_${Date.now()}`;
+      const { data } = await supabaseClient.storage.from('photos').upload(fileName, file);
+      if (data) imageUrl = supabaseClient.storage.from('photos').getPublicUrl(fileName).data.publicUrl;
     }
 
-    let authorName = "익명";
-    if (currentUser) {
-      const { data: prof } = await supabaseClient.from('profiles').select('nickname').eq('id', currentUser.id).single();
-      authorName = prof?.nickname || currentUser.user_metadata.full_name;
-    }
-
-    await supabaseClient.from('anonymous_posts').insert([{ content, author: authorName, gallery_name: activeGallery, image_url: imageUrl }]);
-    closeWriteBox(); loadPosts();
-  }
-
-  async function deletePost(postId) {
-    if (confirm("정말로 삭제하시겠습니까?")) {
-      await supabaseClient.from('anonymous_posts').delete().eq('id', postId);
-      loadPosts();
-    }
+    await supabaseClient.from('anonymous_posts').insert([{ 
+      content, 
+      gallery_name: activeGallery, 
+      author: currentUser?.user_metadata.full_name || "익명",
+      image_url: imageUrl 
+    }]);
+    location.reload();
   }
 
   async function loadPosts() {
     const { data: posts } = await supabaseClient.from('anonymous_posts').select('*').eq('gallery_name', activeGallery).order('created_at', { ascending: false });
     const grid = document.getElementById('board-grid');
-    if (posts && posts.length > 0) {
-      grid.innerHTML = posts.map(p => {
-        const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
-        const deleteHtml = isAdmin ? `<button class="delete-btn" onclick="deletePost('${p.id}')">삭제</button>` : '';
-        const imageHtml = p.image_url ? `<img src="${p.image_url}" class="post-img">` : '';
-        return `<div class="post-card"><div class="icon-box">0</div>${imageHtml}<div class="post-title">${p.content}</div><div class="post-footer"><div class="post-date">${p.author} | ${new Date(p.created_at).toLocaleDateString()}</div><div class="post-date" style="color:inherit; font-weight:bold;">#${activeGallery}</div>${deleteHtml}</div></div>`;
-      }).join('');
-    } else {
-      grid.innerHTML = `<p style="color:#888;">글이 없습니다.</p>`;
-    }
+    grid.innerHTML = posts?.map(p => `
+      <div class="post-card">
+        <div class="icon-box">0</div>
+        ${p.image_url ? `<img src="${p.image_url}" class="post-img">` : ''}
+        <div style="font-weight:bold;">${p.content}</div>
+        <div style="font-size:11px; opacity:0.6;">${p.author}</div>
+      </div>
+    `).join('') || '<p>글이 없습니다.</p>';
   }
 
-  // 게임 탭 전용 사격 효과
   window.addEventListener('mousedown', function(e) {
     if (!document.body.classList.contains('game-mode')) return;
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 8; i++) {
       const p = document.createElement('div');
       p.style.cssText = `position:fixed; left:${e.clientX}px; top:${e.clientY}px; width:4px; height:4px; background:red; z-index:9999; pointer-events:none;`;
       document.body.appendChild(p);
-      const a = Math.random() * Math.PI * 2, s = Math.random() * 10 + 2;
+      const a = Math.random() * Math.PI * 2, s = Math.random() * 8 + 2;
       let vx = Math.cos(a) * s, vy = Math.sin(a) * s;
       const move = setInterval(() => {
         vx *= 0.9; vy += 0.5;
