@@ -5,168 +5,145 @@
   <title>Datinoon - Gallery System</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; margin: 0; background: #fff; overflow-x: hidden; transition: 0.3s; }
-    .header { border-bottom: 2px solid #000; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; background: inherit; height: 70px; }
-    .logo-img { height: 40px; cursor: pointer; border: 1px solid #000; }
-    .search-bar { border: 1px solid #000; padding: 5px 15px; width: 40%; max-width: 400px; }
+    body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; margin: 0; background: #fff; }
     
-    .gallery-container { padding: 20px 50px 0 50px; display: flex; gap: 10px; }
-    .gallery-tab { padding: 8px 25px; border: 2px solid #000; background: #fff; font-weight: 900; cursor: pointer; transition: 0.2s; color: #000; }
-    .gallery-tab.active { background: #000; color: #fff; }
+    /* 헤더 구조 수정: 로그인 영역이 확실히 우측에 배치되도록 설정 */
+    .header { 
+      border-bottom: 2px solid #000; 
+      padding: 0 50px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      height: 70px; 
+      background: #fff;
+    }
+    .logo-img { height: 40px; cursor: pointer; border: 1px solid #000; }
+    
+    /* 로그인 영역: 흰색 배경에서도 잘 보이게 검정색 테두리와 글자색 지정 */
+    #auth-area { 
+      display: flex; 
+      align-items: center; 
+      gap: 15px; 
+      font-weight: bold;
+    }
+    .login-btn { 
+      padding: 8px 20px; 
+      border: 2px solid #000; 
+      background: #000; 
+      color: #fff; 
+      font-weight: 900; 
+      cursor: pointer; 
+      font-size: 14px;
+    }
+    .logout-btn {
+      padding: 4px 10px;
+      border: 1px solid #000;
+      background: #fff;
+      cursor: pointer;
+      font-size: 11px;
+    }
 
-    .write-box { display: none; margin: 20px 50px; padding: 20px; border: 3px solid #000; background: #fafafa; }
-    .write-box input[type="text"] { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #000; box-sizing: border-box; }
+    /* 갤러리 탭 및 레이아웃 */
+    .gallery-container { padding: 20px 50px 0 50px; display: flex; gap: 10px; }
+    .gallery-tab { padding: 8px 25px; border: 2px solid #000; background: #fff; font-weight: 900; cursor: pointer; color: #000; }
+    .gallery-tab.active { background: #000; color: #fff; }
 
     .container { padding: 20px 50px; }
     .board-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-    .post-card { border: 2px solid #000; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fff; position: relative; color: #000; min-height: 200px; }
-    .post-img { width: 100%; border: 1px solid #eee; border-radius: 4px; object-fit: cover; max-height: 400px; }
+    .post-card { border: 2px solid #000; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fff; }
     .icon-box { width: 40px; height: 50px; border: 3px solid #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; }
-    
-    .delete-btn { background: red; color: white; border: none; font-size: 10px; padding: 4px 8px; cursor: pointer; font-weight: bold; width: fit-content; }
-    .write-btn { position: fixed; bottom: 30px; right: 30px; padding: 15px 35px; background: #000; color: #fff; font-weight: 900; cursor: pointer; border-radius: 50px; border: none; z-index: 1000; box-shadow: 5px 5px 0 #ccc; }
 
     /* 게임 탭 전용 */
-    #world-map-container { display: none; width: 100%; margin-bottom: 30px; border: 2px solid #ff0000; background: #000; }
-    .world-map { width: 100%; height: auto; display: block; filter: invert(1) hue-rotate(180deg) brightness(0.8); opacity: 0.7; }
-
-    body.game-mode { background: #0c0c0c; color: #ff0000; cursor: crosshair !important; }
+    #world-map-container { display: none; width: 100%; margin-bottom: 30px; border: 2px solid #ff0000; }
     body.game-mode #world-map-container { display: block; }
-    body.game-mode .post-card { background: #1a1a1a; border-color: #ff0000; color: #fff; }
-    body.game-mode .gallery-tab.active { background: #ff0000; border-color: #ff0000; }
+    body.game-mode { background: #0c0c0c; color: #ff0000; }
   </style>
 </head>
 <body>
 
 <header class="header">
   <img src="images/Datinoon_0.4.1.png" class="logo-img" onclick="location.reload()">
-  <input type="text" class="search-bar" placeholder="갤러리 내 검색...">
   <div id="auth-area"></div>
 </header>
 
 <div class="gallery-container">
   <div class="gallery-tab active" onclick="switchGallery('자유', this)">자유 갤러리</div>
   <div class="gallery-tab" onclick="switchGallery('게임', this)">게임 탭</div>
-  <div class="gallery-tab" onclick="switchGallery('공지', this)">운영 공지</div>
-</div>
-
-<div id="write-box" class="write-box">
-  <input type="text" id="post-content" placeholder="공유하고 싶은 내용을 입력하세요...">
-  <input type="file" id="post-file" accept="image/*">
-  <div style="display:flex; gap:10px; margin-top:10px;">
-    <button onclick="submitPost()" style="background:#000; color:#fff; padding:10px 20px; font-weight:900; cursor:pointer;">게시글 올리기</button>
-    <button onclick="document.getElementById('write-box').style.display='none'" style="cursor:pointer;">취소</button>
-  </div>
 </div>
 
 <div class="container">
-  <h2 id="current-gallery-title" style="margin-bottom: 20px;">자유 갤러리</h2>
+  <h2 id="current-gallery-title">자유 갤러리</h2>
   <div id="world-map-container">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" class="world-map">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" style="width:100%; filter: invert(1);">
   </div>
   <div id="board-grid" class="board-grid"></div>
 </div>
-
-<button id="write-trigger" class="write-btn" style="display:none;" onclick="document.getElementById('write-box').style.display='block'">+ 글쓰기</button>
 
 <script>
   const SUPABASE_URL = 'https://lhundplpkgafoozxmiyi.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_jngaJT3f3TOfJciY8LTW9A_AStej1TQ';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let currentUser = null;
-  let activeGallery = '자유';
-  const REDIRECT_URL = window.location.href.split('#')[0].split('?')[0];
+  const REDIRECT_URL = window.location.origin + window.location.pathname;
 
-  async function handleGoogleLogin() { 
-    await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: REDIRECT_URL } }); 
+  // 로그인/로그아웃 버튼 렌더링 함수를 분리하여 확실히 동작하게 함
+  function renderAuth(session) {
+    const authArea = document.getElementById('auth-area');
+    if (session) {
+      const name = session.user.user_metadata.full_name || "사용자";
+      authArea.innerHTML = `
+        <span>🪪 ${name}</span>
+        <button class="logout-btn" onclick="handleLogout()">로그아웃</button>
+      `;
+    } else {
+      authArea.innerHTML = `
+        <button class="login-btn" onclick="handleGoogleLogin()">Google 로그인</button>
+      `;
+    }
   }
 
-  supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    const authArea = document.getElementById('auth-area');
-    const writeBtn = document.getElementById('write-trigger');
-    if (session) {
-      currentUser = session.user;
-      const { data: profile } = await supabaseClient.from('profiles').select('nickname').eq('id', currentUser.id).single();
-      const displayName = profile?.nickname || currentUser.user_metadata.full_name;
-      authArea.innerHTML = `<span style="font-weight:bold; margin-right:10px;">🪪 ${displayName}</span> <button onclick="supabaseClient.auth.signOut().then(()=>location.reload())" style="cursor:pointer; font-size:12px;">로그아웃</button>`;
-      writeBtn.style.display = 'block';
-    } else {
-      currentUser = null;
-      authArea.innerHTML = `<button onclick="handleGoogleLogin()" style="font-weight:900; cursor:pointer; padding:5px 15px; border:2px solid #000; background:#fff;">로그인</button>`;
-      writeBtn.style.display = 'none';
-    }
+  async function handleGoogleLogin() { 
+    await supabaseClient.auth.signInWithOAuth({ 
+      provider: 'google', 
+      options: { redirectTo: REDIRECT_URL } 
+    }); 
+  }
+
+  async function handleLogout() {
+    await supabaseClient.auth.signOut();
+    location.reload();
+  }
+
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    renderAuth(session);
     loadPosts();
   });
 
   function switchGallery(galleryName, element) {
-    activeGallery = galleryName;
-    document.getElementById('current-gallery-title').textContent = galleryName + (galleryName === '게임' ? ' 전장' : ' 갤러리');
     document.body.className = (galleryName === '게임' ? 'game-mode' : '');
     document.querySelectorAll('.gallery-tab').forEach(t => t.classList.remove('active'));
     element.classList.add('active');
-    loadPosts();
+    document.getElementById('current-gallery-title').innerText = galleryName + " 갤러리";
+    loadPosts(galleryName);
   }
 
-  async function submitPost() {
-    const content = document.getElementById('post-content').value;
-    const file = document.getElementById('post-file').files[0];
-    if (!content) return alert("내용을 입력해주세요!");
-
-    let imageUrl = null;
-    if (file) {
-      const fileName = `img_${Date.now()}`;
-      const { data } = await supabaseClient.storage.from('photos').upload(fileName, file);
-      if (data) imageUrl = supabaseClient.storage.from('photos').getPublicUrl(fileName).data.publicUrl;
-    }
-
-    await supabaseClient.from('anonymous_posts').insert([{ 
-      content, author: currentUser?.user_metadata.full_name || "익명", gallery_name: activeGallery, image_url: imageUrl 
-    }]);
-    location.reload();
-  }
-
-  async function deletePost(id) {
-    if(confirm("삭제하시겠습니까?")) {
-      await supabaseClient.from('anonymous_posts').delete().eq('id', id);
-      loadPosts();
-    }
-  }
-
-  async function loadPosts() {
-    const { data: posts } = await supabaseClient.from('anonymous_posts').select('*').eq('gallery_name', activeGallery).order('created_at', { ascending: false });
+  async function loadPosts(gallery = '자유') {
+    const { data: posts } = await supabaseClient.from('anonymous_posts').select('*').eq('gallery_name', gallery).order('created_at', { ascending: false });
     const grid = document.getElementById('board-grid');
     grid.innerHTML = (posts && posts.length > 0) ? posts.map(p => `
       <div class="post-card">
         <div class="icon-box">0</div>
-        ${p.image_url ? `<img src="${p.image_url}" class="post-img">` : ''}
-        <div style="font-weight:bold; font-size:16px;">${p.content}</div>
-        <div style="font-size:11px; color:#888; margin-top:auto;">
-          ${p.author} | ${new Date(p.created_at).toLocaleDateString()} <br>
-          <span style="font-weight:bold; color:#000;">#${activeGallery}</span>
-        </div>
-        <button class="delete-btn" onclick="deletePost('${p.id}')">삭제</button>
+        <div style="font-weight:bold;">${p.content}</div>
+        <div style="font-size:11px; color:#888;">${p.author} | ${new Date(p.created_at).toLocaleDateString()}</div>
       </div>
-    `).join('') : '<p style="color:#888;">게시글이 없습니다.</p>';
+    `).join('') : '<p>게시글이 없습니다.</p>';
   }
 
-  window.addEventListener('mousedown', function(e) {
-    if (!document.body.classList.contains('game-mode')) return;
-    for (let i = 0; i < 8; i++) {
-      const p = document.createElement('div');
-      p.style.cssText = `position:fixed; left:${e.clientX}px; top:${e.clientY}px; width:4px; height:4px; background:red; z-index:9999; pointer-events:none;`;
-      document.body.appendChild(p);
-      const a = Math.random() * Math.PI * 2, s = Math.random() * 8 + 2;
-      let vx = Math.cos(a) * s, vy = Math.sin(a) * s;
-      const move = setInterval(() => {
-        vx *= 0.9; vy += 0.5;
-        p.style.left = parseFloat(p.style.left) + vx + 'px';
-        p.style.top = parseFloat(p.style.top) + vy + 'px';
-        p.style.opacity = parseFloat(p.style.opacity || 1) - 0.05;
-        if (p.style.opacity <= 0) { p.remove(); clearInterval(move); }
-      }, 20);
-    }
-  });
+  window.onload = () => {
+    // 초기 세션 체크
+    supabaseClient.auth.getSession().then(({data}) => renderAuth(data.session));
+    loadPosts();
+  };
 </script>
 </body>
 </html>
